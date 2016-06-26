@@ -7,7 +7,7 @@ CLASS zcl_swag DEFINITION
     TYPES:
       BEGIN OF ty_url,
         regex       TYPE string,
-        group_names TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
+        group_names TYPE STANDARD TABLE OF seosconame WITH DEFAULT KEY,
       END OF ty_url.
     TYPES:
       BEGIN OF ty_meta,
@@ -27,49 +27,57 @@ CLASS zcl_swag DEFINITION
     METHODS run.
     METHODS serve_spec.
   PROTECTED SECTION.
-  PRIVATE SECTION.
+PRIVATE SECTION.
 
-    TYPES:
-      ty_parameters_tt TYPE STANDARD TABLE OF seosubcodf WITH DEFAULT KEY.
-    TYPES:
-      BEGIN OF ty_meta_internal,
-        meta       TYPE ty_meta,
-        obj        TYPE REF TO object,
-        parameters TYPE ty_parameters_tt,
-        classname  TYPE seoclsname,
-      END OF ty_meta_internal.
-    TYPES:
-      ty_meta_internal_tt TYPE STANDARD TABLE OF ty_meta_internal WITH DEFAULT KEY.
+  TYPES:
+    ty_parameters_tt TYPE STANDARD TABLE OF seosubcodf WITH DEFAULT KEY .
+  TYPES:
+    BEGIN OF ty_meta_internal,
+      meta       TYPE ty_meta,
+      obj        TYPE REF TO object,
+      parameters TYPE ty_parameters_tt,
+      classname  TYPE seoclsname,
+    END OF ty_meta_internal .
+  TYPES:
+    ty_meta_internal_tt TYPE STANDARD TABLE OF ty_meta_internal WITH DEFAULT KEY .
 
-    DATA mi_server TYPE REF TO if_http_server.
-    DATA mt_meta TYPE ty_meta_internal_tt.
-    CONSTANTS:
-      BEGIN OF c_parm_kind,
-        importing TYPE seopardecl VALUE '0',
-        exporting TYPE seopardecl VALUE '1',	
-        changing  TYPE seopardecl VALUE '2',	
-        returning TYPE seopardecl VALUE '3',	
-      END OF c_parm_kind.
+  DATA mi_server TYPE REF TO if_http_server .
+  DATA mt_meta TYPE ty_meta_internal_tt .
+  CONSTANTS:
+    BEGIN OF c_parm_kind,
+      importing TYPE seopardecl VALUE '0',
+      exporting TYPE seopardecl VALUE '1',	
+      changing  TYPE seopardecl VALUE '2',	
+      returning TYPE seopardecl VALUE '3',	
+    END OF c_parm_kind .
 
-    METHODS json_reply
-      IMPORTING
-        !is_meta       TYPE ty_meta_internal
-        !it_parameters TYPE abap_parmbind_tab
-      RETURNING
-        VALUE(rv_json) TYPE xstring.
-    METHODS build_parameters
-      IMPORTING
-        !is_meta             TYPE ty_meta_internal
-      RETURNING
-        VALUE(rt_parameters) TYPE abap_parmbind_tab.
-    METHODS create_data
-      IMPORTING
-        !is_meta       TYPE ty_meta_internal
-      RETURNING
-        VALUE(rr_data) TYPE REF TO data.
-    METHODS validate_parameters
-      IMPORTING
-        !it_parameters TYPE ty_parameters_tt.
+  METHODS build_parameters
+    IMPORTING
+      !is_meta             TYPE ty_meta_internal
+    RETURNING
+      VALUE(rt_parameters) TYPE abap_parmbind_tab .
+  METHODS create_data
+    IMPORTING
+      !is_meta       TYPE ty_meta_internal
+    RETURNING
+      VALUE(rr_data) TYPE REF TO data .
+  METHODS from_input
+    IMPORTING
+      !is_meta TYPE ty_meta_internal
+      !ir_ref  TYPE REF TO data .
+  METHODS from_path
+    IMPORTING
+      !is_meta TYPE ty_meta_internal
+      !ir_ref  TYPE REF TO data .
+  METHODS json_reply
+    IMPORTING
+      !is_meta       TYPE ty_meta_internal
+      !it_parameters TYPE abap_parmbind_tab
+    RETURNING
+      VALUE(rv_json) TYPE xstring .
+  METHODS validate_parameters
+    IMPORTING
+      !it_parameters TYPE ty_parameters_tt .
 ENDCLASS.
 
 
@@ -80,7 +88,8 @@ CLASS ZCL_SWAG IMPLEMENTATION.
   METHOD build_parameters.
 
     DATA: ls_parameter LIKE LINE OF rt_parameters,
-          lr_dref      TYPE REF TO data.
+          lr_dref      TYPE REF TO data,
+          lv_component TYPE string.
 
     FIELD-SYMBOLS: <lg_comp>  TYPE any,
                    <lg_struc> TYPE any.
@@ -97,9 +106,11 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       INSERT ls_parameter INTO TABLE rt_parameters.
     ENDLOOP.
 
-* todo
-    ASSIGN COMPONENT 'IV_FOO' OF STRUCTURE <lg_struc> TO <lg_comp>.
-    <lg_comp> = 'test'.
+    from_path( is_meta = is_meta
+               ir_ref  = lr_dref ).
+
+    from_input( is_meta = is_meta
+                ir_ref  = lr_dref ).
 
   ENDMETHOD.
 
@@ -147,6 +158,90 @@ CLASS ZCL_SWAG IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD from_input.
+
+    DATA: lv_json TYPE xstring,
+          lt_rtab TYPE abap_trans_resbind_tab,
+          lv_bar  TYPE string.
+
+    FIELD-SYMBOLS: <lg_comp>  TYPE any,
+                   <lg_struc> TYPE any.
+
+
+    ASSIGN ir_ref->* TO <lg_struc>.
+
+    DATA(lv_cdata) = mi_server->request->get_cdata( ).
+
+    DATA(lo_writer) = cl_sxml_string_writer=>create( type = if_sxml=>co_xt_json ).
+
+    CALL TRANSFORMATION demo_json_xml_to_upper
+      SOURCE XML lv_cdata
+      RESULT XML lo_writer.
+
+    lv_json = lo_writer->get_output( ).
+
+    LOOP AT is_meta-parameters ASSIGNING FIELD-SYMBOL(<ls_parameter>)
+        WHERE pardecltyp = c_parm_kind-importing.
+      READ TABLE is_meta-meta-url-group_names FROM <ls_parameter>-sconame
+        TRANSPORTING NO FIELDS.
+      IF sy-subrc = 0.
+* ignore parameters that are part of url
+        CONTINUE.
+      ENDIF.
+
+      APPEND INITIAL LINE TO lt_rtab ASSIGNING FIELD-SYMBOL(<ls_rtab>).
+      <ls_rtab>-name  = <ls_parameter>-sconame.
+      ASSIGN COMPONENT <ls_parameter>-sconame OF STRUCTURE <lg_struc> TO <lg_comp>.
+      ASSERT sy-subrc = 0.
+      <ls_rtab>-value = REF #( <lg_comp> ).
+    ENDLOOP.
+
+    IF lines( lt_rtab ) > 0.
+      CALL TRANSFORMATION id
+        SOURCE XML lv_json
+        RESULT (lt_rtab).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD from_path.
+
+    DEFINE _store.
+      READ TABLE is_meta-meta-url-group_names INDEX &1 INTO lv_component.
+      IF sy-subrc = 0.
+        ASSIGN COMPONENT lv_component OF STRUCTURE <lg_struc> TO <lg_comp>.
+        ASSERT sy-subrc = 0.
+        <lg_comp> = lv_match&1.
+      ENDIF.
+    END-OF-DEFINITION.
+
+    DATA: lv_component TYPE string,
+          lv_match1    TYPE string,
+          lv_match2    TYPE string,
+          lv_match3    TYPE string,
+          lv_match4    TYPE string,
+          lv_match5    TYPE string.
+
+    FIELD-SYMBOLS: <lg_comp>  TYPE any,
+                   <lg_struc> TYPE any.
+
+
+    ASSIGN ir_ref->* TO <lg_struc>.
+
+    DATA(lv_path) = mi_server->request->get_header_field( '~path' ).
+    FIND REGEX is_meta-meta-url-regex IN lv_path
+      SUBMATCHES lv_match1 lv_match2 lv_match3 lv_match4 lv_match5.
+
+    _store 1.
+    _store 2.
+    _store 3.
+    _store 4.
+    _store 5.
+
+  ENDMETHOD.
+
+
   METHOD json_reply.
 
     DATA: lo_writer TYPE REF TO cl_sxml_string_writer.
@@ -190,7 +285,8 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     SELECT * FROM seosubcodf
       INTO TABLE ls_meta-parameters
       WHERE clsname = ls_meta-classname
-      AND cmpname = ls_meta-meta-handler.
+      AND cmpname = ls_meta-meta-handler
+      ORDER BY PRIMARY KEY.
     ASSERT sy-subrc = 0.
 
     validate_parameters( ls_meta-parameters ).

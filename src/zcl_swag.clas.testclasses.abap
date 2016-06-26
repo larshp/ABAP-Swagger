@@ -47,7 +47,7 @@ CLASS ltcl_test IMPLEMENTATION.
   METHOD if_http_entity~get_header_field.
     CASE name.
       WHEN '~path'.
-        value = '/swag/foobar/'.
+        value = '/swag/foo/'.
       WHEN OTHERS.
         cl_abap_unit_assert=>fail( ).
     ENDCASE.
@@ -55,6 +55,10 @@ CLASS ltcl_test IMPLEMENTATION.
 
   METHOD if_http_entity~set_data.
     mv_reply = to_string( data ).
+  ENDMETHOD.
+
+  METHOD if_http_entity~get_cdata.
+    data = '{"IV_BAR":"bar"}'.
   ENDMETHOD.
 
   METHOD test.

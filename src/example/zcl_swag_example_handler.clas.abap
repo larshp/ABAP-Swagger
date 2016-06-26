@@ -30,6 +30,7 @@ CLASS ZCL_SWAG_EXAMPLE_HANDLER IMPLEMENTATION.
   METHOD the_real_stuff.
 
     CONCATENATE iv_foo iv_bar INTO rs_data-foo.
+    rs_data-bar = iv_bar.
 
   ENDMETHOD.
 
