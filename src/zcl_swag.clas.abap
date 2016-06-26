@@ -1,69 +1,75 @@
-class ZCL_SWAG definition
-  public
-  create public .
+CLASS zcl_swag DEFINITION
+  PUBLIC
+  CREATE PUBLIC.
 
-public section.
+  PUBLIC SECTION.
 
-  types:
-    BEGIN OF ty_url,
-             regex       TYPE string,
-             group_names TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
-           END OF ty_url .
-  types:
-    BEGIN OF ty_meta,
-             summary     TYPE string,
-             description TYPE string,
-             url         TYPE ty_url,
-             method      TYPE string,
-             handler     TYPE string,
-           END OF ty_meta .
+    TYPES:
+      BEGIN OF ty_url,
+        regex       TYPE string,
+        group_names TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
+      END OF ty_url.
+    TYPES:
+      BEGIN OF ty_meta,
+        summary     TYPE string,
+        description TYPE string,
+        url         TYPE ty_url,
+        method      TYPE string,
+        handler     TYPE string,
+      END OF ty_meta.
 
-  methods CONSTRUCTOR
-    importing
-      !II_SERVER type ref to IF_HTTP_SERVER .
-  methods REGISTER
-    importing
-      !II_HANDLER type ref to ZIF_SWAG_HANDLER .
-  methods RUN .
-  methods SERVE_SPEC .
-protected section.
-private section.
+    METHODS constructor
+      IMPORTING
+        !ii_server TYPE REF TO if_http_server.
+    METHODS register
+      IMPORTING
+        !ii_handler TYPE REF TO zif_swag_handler.
+    METHODS run.
+    METHODS serve_spec.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
 
-  types:
-    ty_parameters_tt TYPE STANDARD TABLE OF seosubcodf WITH DEFAULT KEY .
-  types:
-    BEGIN OF ty_meta_internal,
-      meta       TYPE ty_meta,
-      obj        TYPE REF TO object,
-      parameters TYPE ty_parameters_tt,
-      classname  TYPE seoclsname,
-    END OF ty_meta_internal .
-  types:
-    ty_meta_internal_tt TYPE STANDARD TABLE OF ty_meta_internal WITH DEFAULT KEY .
+    TYPES:
+      ty_parameters_tt TYPE STANDARD TABLE OF seosubcodf WITH DEFAULT KEY.
+    TYPES:
+      BEGIN OF ty_meta_internal,
+        meta       TYPE ty_meta,
+        obj        TYPE REF TO object,
+        parameters TYPE ty_parameters_tt,
+        classname  TYPE seoclsname,
+      END OF ty_meta_internal.
+    TYPES:
+      ty_meta_internal_tt TYPE STANDARD TABLE OF ty_meta_internal WITH DEFAULT KEY.
 
-  data MI_SERVER type ref to IF_HTTP_SERVER .
-  data MT_META type TY_META_INTERNAL_TT .
-  constants:
-    BEGIN OF c_parm_kind,
-               importing TYPE seopardecl VALUE '0',
-               exporting TYPE seopardecl VALUE '1',	
-               changing  TYPE  seopardecl VALUE '2',	
-               returning TYPE seopardecl VALUE '3',	
-             END OF c_parm_kind .
+    DATA mi_server TYPE REF TO if_http_server.
+    DATA mt_meta TYPE ty_meta_internal_tt.
+    CONSTANTS:
+      BEGIN OF c_parm_kind,
+        importing TYPE seopardecl VALUE '0',
+        exporting TYPE seopardecl VALUE '1',	
+        changing  TYPE seopardecl VALUE '2',	
+        returning TYPE seopardecl VALUE '3',	
+      END OF c_parm_kind.
 
-  methods BUILD_PARAMETERS
-    importing
-      !IS_META type TY_META_INTERNAL
-    returning
-      value(RT_PARAMETERS) type ABAP_PARMBIND_TAB .
-  methods CREATE_DATA
-    importing
-      !IS_META type TY_META_INTERNAL
-    returning
-      value(RR_DATA) type ref to DATA .
-  methods VALIDATE_PARAMETERS
-    importing
-      !IT_PARAMETERS type TY_PARAMETERS_TT .
+    METHODS json_reply
+      IMPORTING
+        !is_meta       TYPE ty_meta_internal
+        !it_parameters TYPE abap_parmbind_tab
+      RETURNING
+        VALUE(rv_json) TYPE xstring.
+    METHODS build_parameters
+      IMPORTING
+        !is_meta             TYPE ty_meta_internal
+      RETURNING
+        VALUE(rt_parameters) TYPE abap_parmbind_tab.
+    METHODS create_data
+      IMPORTING
+        !is_meta       TYPE ty_meta_internal
+      RETURNING
+        VALUE(rr_data) TYPE REF TO data.
+    METHODS validate_parameters
+      IMPORTING
+        !it_parameters TYPE ty_parameters_tt.
 ENDCLASS.
 
 
@@ -76,26 +82,24 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     DATA: ls_parameter LIKE LINE OF rt_parameters,
           lr_dref      TYPE REF TO data.
 
-    FIELD-SYMBOLS: <comp>  TYPE any,
-                   <struc> TYPE any.
+    FIELD-SYMBOLS: <lg_comp>  TYPE any,
+                   <lg_struc> TYPE any.
 
 
     lr_dref = create_data( is_meta ).
-    ASSIGN lr_dref->* TO <struc>.
+    ASSIGN lr_dref->* TO <lg_struc>.
 
-    ASSIGN COMPONENT 'IV_FOO' OF STRUCTURE <struc> TO <comp>.
-    <comp> = 'test'.
-    ls_parameter-name  = 'IV_FOO'.
-    ls_parameter-value = REF #( <comp> ).
-    INSERT ls_parameter INTO TABLE rt_parameters.
+    LOOP AT is_meta-parameters ASSIGNING FIELD-SYMBOL(<ls_parameter>).
+      ASSIGN COMPONENT <ls_parameter>-sconame OF STRUCTURE <lg_struc> TO <lg_comp>.
+      ASSERT sy-subrc = 0.
+      ls_parameter-name  = <ls_parameter>-sconame.
+      ls_parameter-value = REF #( <lg_comp> ).
+      INSERT ls_parameter INTO TABLE rt_parameters.
+    ENDLOOP.
 
-    ASSIGN COMPONENT 'RS_DATA' OF STRUCTURE <struc> TO <comp>.
-    ls_parameter-name  = 'RS_DATA'.
-    ls_parameter-value = REF #( <comp> ).
-    INSERT ls_parameter INTO TABLE rt_parameters.
-
-*    ASSIGN COMPONENT 'IV_FOO' OF STRUCTURE <struc> TO <comp>.
-*    <comp> = 'test'.
+* todo
+    ASSIGN COMPONENT 'IV_FOO' OF STRUCTURE <lg_struc> TO <lg_comp>.
+    <lg_comp> = 'test'.
 
   ENDMETHOD.
 
@@ -113,9 +117,6 @@ CLASS ZCL_SWAG IMPLEMENTATION.
           lt_components TYPE cl_abap_structdescr=>component_table,
           lo_typedescr  TYPE REF TO cl_abap_typedescr,
           lv_name       TYPE string.
-
-    FIELD-SYMBOLS: <comp>  TYPE any,
-                   <struc> TYPE any.
 
 
     LOOP AT is_meta-parameters ASSIGNING FIELD-SYMBOL(<ls_parameter>).
@@ -142,6 +143,32 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     lo_struct = cl_abap_structdescr=>get( lt_components ).
 
     CREATE DATA rr_data TYPE HANDLE lo_struct.
+
+  ENDMETHOD.
+
+
+  METHOD json_reply.
+
+    DATA: lo_writer TYPE REF TO cl_sxml_string_writer.
+
+    FIELD-SYMBOLS: <lg_struc> TYPE any.
+
+
+    READ TABLE is_meta-parameters ASSIGNING FIELD-SYMBOL(<ls_meta>)
+      WITH KEY pardecltyp = c_parm_kind-returning.
+    IF sy-subrc  = 0.
+      READ TABLE it_parameters ASSIGNING FIELD-SYMBOL(<ls_parameter>)
+        WITH KEY name = <ls_meta>-sconame.
+      ASSERT sy-subrc = 0.
+
+      lo_writer = cl_sxml_string_writer=>create( if_sxml=>co_xt_json ).
+      ASSIGN <ls_parameter>-value->* TO <lg_struc>.
+      CALL TRANSFORMATION id
+        SOURCE data = <lg_struc>
+        RESULT XML lo_writer.
+      rv_json = lo_writer->get_output( ).
+
+    ENDIF.
 
   ENDMETHOD.
 
@@ -187,10 +214,16 @@ CLASS ZCL_SWAG IMPLEMENTATION.
         lt_parameters = build_parameters( <ls_meta> ).
         CALL METHOD <ls_meta>-obj->(<ls_meta>-meta-handler)
           PARAMETER-TABLE lt_parameters.
-* todo
 
+        DATA(lv_json) = json_reply(
+          is_meta       = <ls_meta>
+          it_parameters = lt_parameters ).
+
+        mi_server->response->set_data( lv_json ).
       ENDIF.
     ENDLOOP.
+
+* todo, error if no handler found
 
   ENDMETHOD.
 

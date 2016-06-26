@@ -1,25 +1,25 @@
-class ZCL_SWAG_EXAMPLE_HANDLER definition
-  public
-  create public .
+CLASS zcl_swag_example_handler DEFINITION
+  PUBLIC
+  CREATE PUBLIC.
 
-public section.
+  PUBLIC SECTION.
 
-  interfaces ZIF_SWAG_HANDLER .
+    INTERFACES zif_swag_handler.
 
-  types:
-    BEGIN OF ty_structure,
-             foo TYPE string,
-             bar TYPE string,
-           END OF ty_structure .
+    TYPES:
+      BEGIN OF ty_structure,
+        foo TYPE string,
+        bar TYPE string,
+      END OF ty_structure.
 
-  methods THE_REAL_STUFF
-    importing
-      !IV_FOO type STRING optional
-      !IV_BAR type STRING optional
-    returning
-      value(RS_DATA) type TY_STRUCTURE .
-protected section.
-private section.
+    METHODS the_real_stuff
+      IMPORTING
+        !iv_foo        TYPE string OPTIONAL
+        !iv_bar        TYPE string OPTIONAL
+      RETURNING
+        VALUE(rs_data) TYPE ty_structure.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
 ENDCLASS.
 
 
@@ -29,9 +29,7 @@ CLASS ZCL_SWAG_EXAMPLE_HANDLER IMPLEMENTATION.
 
   METHOD the_real_stuff.
 
-    BREAK-POINT.
-
-    rs_data-foo = 'data'.
+    CONCATENATE iv_foo iv_bar INTO rs_data-foo.
 
   ENDMETHOD.
 
