@@ -6,12 +6,18 @@ public section.
 
   interfaces ZIF_SWAG_HANDLER .
 
+  types:
+    BEGIN OF ty_structure,
+             foo TYPE string,
+             bar TYPE string,
+           END OF ty_structure .
+
   methods THE_REAL_STUFF
     importing
       !IV_FOO type STRING optional
       !IV_BAR type STRING optional
     returning
-      value(RS_DATA) type STRING .
+      value(RS_DATA) type TY_STRUCTURE .
 protected section.
 private section.
 ENDCLASS.
@@ -25,7 +31,7 @@ CLASS ZCL_SWAG_EXAMPLE_HANDLER IMPLEMENTATION.
 
     BREAK-POINT.
 
-    rs_data = 'data'.
+    rs_data-foo = 'data'.
 
   ENDMETHOD.
 
