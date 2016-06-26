@@ -1,31 +1,36 @@
-CLASS zcl_swag DEFINITION
-  PUBLIC
-  CREATE PUBLIC.
+class ZCL_SWAG definition
+  public
+  create public .
 
-  PUBLIC SECTION.
+public section.
 
-    TYPES:
-      BEGIN OF ty_url,
+  types:
+    BEGIN OF ty_url,
         regex       TYPE string,
         group_names TYPE STANDARD TABLE OF seosconame WITH DEFAULT KEY,
-      END OF ty_url.
-    TYPES:
-      BEGIN OF ty_meta,
+      END OF ty_url .
+  types:
+    BEGIN OF ty_meta,
         summary     TYPE string,
         description TYPE string,
         url         TYPE ty_url,
         method      TYPE string,
         handler     TYPE string,
-      END OF ty_meta.
+      END OF ty_meta .
 
-    METHODS constructor
-      IMPORTING
-        !ii_server TYPE REF TO if_http_server.
-    METHODS register
-      IMPORTING
-        !ii_handler TYPE REF TO zif_swag_handler.
-    METHODS run.
-    METHODS serve_spec.
+  methods CONSTRUCTOR
+    importing
+      !II_SERVER type ref to IF_HTTP_SERVER .
+  methods REGISTER
+    importing
+      !II_HANDLER type ref to ZIF_SWAG_HANDLER .
+  methods RUN .
+  methods GENERATE_UI
+    returning
+      value(RV_UI) type STRING .
+  methods GENERATE_SPEC
+    returning
+      value(RV_SPEC) type STRING .
   PROTECTED SECTION.
 PRIVATE SECTION.
 
@@ -242,6 +247,143 @@ CLASS ZCL_SWAG IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD generate_spec.
+
+    DEFINE _add.
+      CONCATENATE rv_spec &1 cl_abap_char_utilities=>newline
+        INTO rv_spec ##NO_TEXT.
+    END-OF-DEFINITION.
+
+    _add '{'.
+    _add '  "swagger":"2.0",'.
+    _add '  "info":{  '.
+    _add '    "version":"1.0.0",'.
+    _add '    "title":"Example",'.
+    _add '    "description":"Example use of ABAP Swagger"'.
+    _add '  },'.
+    _add '  "host":"localhost",'.
+    _add '  "basePath":"/api",'.
+    _add '  "schemes":['.
+    _add '    "http"'.
+    _add '  ],'.
+    _add '  "consumes":['.
+    _add '    "application/json"'.
+    _add '  ],'.
+    _add '  "produces":['.
+    _add '    "application/json"'.
+    _add '  ],'.
+    _add '  "paths":{'.
+    _add '    "/path/{IV_FOO}":{'.
+    _add '      "get":{  '.
+    _add '        "description":"description",'.
+    _add '        "parameters":['.
+    _add '          {  '.
+    _add '            "name":"IV_FOO",'.
+    _add '            "in":"path",'.
+    _add '            "description":"something",'.
+    _add '            "type":"string",'.
+    _add '            "required":true'.
+    _add '          },'.
+    _add '          {'.
+    _add '            "name":"IV_BAR",'.
+    _add '            "in":"formData",'.
+    _add '            "description":"something",'.
+    _add '            "type":"string",'.
+    _add '            "required":true'.
+    _add '          }'.
+    _add '        ],'.
+    _add '        "produces":['.
+    _add '          "application/json"'.
+    _add '        ],'.
+    _add '        "responses":{'.
+    _add '          "200":{  '.
+    _add '            "description":"response description",'.
+    _add '            "schema":{  '.
+    _add '              "$ref":"#/definitions/Response"'.
+    _add '            }'.
+    _add '          }'.
+    _add '        }'.
+    _add '      }'.
+    _add '    }'.
+    _add '  },'.
+    _add '  "definitions":{'.
+    _add '    "Response":{'.
+    _add '      "type":"object",'.
+    _add '      "properties":{  '.
+    _add '        "FOO":{'.
+    _add '          "type":"string"'.
+    _add '        },'.
+    _add '        "BAR":{'.
+    _add '          "type":"string"'.
+    _add '        }'.
+    _add '      }'.
+    _add '    }'.
+    _add '  }'.
+    _add '}'.
+
+  ENDMETHOD.
+
+
+  METHOD generate_ui.
+
+    DEFINE _add.
+      CONCATENATE rv_ui &1 cl_abap_char_utilities=>newline
+        INTO rv_ui ##NO_TEXT.
+    END-OF-DEFINITION.
+
+    _add '<!DOCTYPE html>'.
+    _add '<html>'.
+    _add '<head>'.
+    _add '<meta charset="UTF-8">'.
+    _add '<title>Swagger UI</title>'.
+    _add '<link rel="icon" type="image/png" href="https://npmcdn.com/swagger-ui@2.1.4/dist/images/favicon-32x32.png" sizes="32x32" />'.
+    _add '<link rel="icon" type="image/png" href="https://npmcdn.com/swagger-ui@2.1.4/dist/images/favicon-16x16.png" sizes="16x16" />'.
+    _add '<link href="https://npmcdn.com/swagger-ui@2.1.4/dist/css/typography.css" media="screen" rel="stylesheet" type="text/css"/>'.
+    _add '<link href="https://npmcdn.com/swagger-ui@2.1.4/dist/css/reset.css" media="screen" rel="stylesheet" type="text/css"/>'.
+    _add '<link href="https://npmcdn.com/swagger-ui@2.1.4/dist/css/screen.css" media="screen" rel="stylesheet" type="text/css"/>'.
+    _add '<link href="https://npmcdn.com/swagger-ui@2.1.4/dist/css/reset.css" media="print" rel="stylesheet" type="text/css"/>'.
+    _add '<link href="https://npmcdn.com/swagger-ui@2.1.4/dist/css/print.css" media="print" rel="stylesheet" type="text/css"/>'.
+    _add '<script src="https://npmcdn.com/swagger-ui@2.1.4/dist/lib/jquery-1.8.0.min.js" type="text/javascript"></script>'.
+    _add '<script src="https://npmcdn.com/swagger-ui@2.1.4/dist/lib/jquery.slideto.min.js" type="text/javascript"></script>'.
+    _add '<script src="https://npmcdn.com/swagger-ui@2.1.4/dist/lib/jquery.wiggle.min.js" type="text/javascript"></script>'.
+    _add '<script src="https://npmcdn.com/swagger-ui@2.1.4/dist/lib/jquery.ba-bbq.min.js" type="text/javascript"></script>'.
+    _add '<script src="https://npmcdn.com/swagger-ui@2.1.4/dist/lib/handlebars-2.0.0.js" type="text/javascript"></script>'.
+    _add '<script src="https://npmcdn.com/swagger-ui@2.1.4/dist/lib/underscore-min.js" type="text/javascript"></script>'.
+    _add '<script src="https://npmcdn.com/swagger-ui@2.1.4/dist/lib/backbone-min.js" type="text/javascript"></script>'.
+    _add '<script src="https://npmcdn.com/swagger-ui@2.1.4/dist/swagger-ui.js" type="text/javascript"></script>'.
+    _add '<script src="https://npmcdn.com/swagger-ui@2.1.4/dist/lib/highlight.7.3.pack.js" type="text/javascript"></script>'.
+    _add '<script src="https://npmcdn.com/swagger-ui@2.1.4/dist/lib/jsoneditor.min.js" type="text/javascript"></script>'.
+    _add '<script src="https://npmcdn.com/swagger-ui@2.1.4/dist/lib/marked.js" type="text/javascript"></script>'.
+    _add '<script src="https://npmcdn.com/swagger-ui@2.1.4/dist/lib/swagger-oauth.js" type="text/javascript"></script>'.
+    _add '</head>'.
+    _add '<body class="swagger-section">'.
+    _add '<div id="header">'.
+    _add '<div class="swagger-ui-wrap">'.
+    _add '<a id="logo" href="http://swagger.io"><span class="logo__title">swagger</span></a>'.
+    _add '<form id="api_selector">'.
+    _add '<div class="input">'.
+    _add '<input placeholder="http://example.com/api" id="input_baseUrl" name="baseUrl" type="text"/></div>'.
+    _add '<div id="auth_container"></div>'.
+    _add '<div class="input"><a id="explore" class="header__btn" href="#" data-sw-translate>Explore</a></div>'.
+    _add '</form>'.
+    _add '</div>'.
+    _add '</div>'.
+    _add '<div id="message-bar" class="swagger-ui-wrap" data-sw-translate>&nbsp;</div>'.
+    _add '<div id="swagger-ui-container" class="swagger-ui-wrap"></div>'.
+    _add '<script type="text/javascript">'.
+    _add 'var swaggerUi = new SwaggerUi({'.
+    _add 'url:"swagger.json",'.
+    _add 'validatorUrl:null,'.
+    _add 'dom_id:"swagger-ui-container"'.
+    _add '});'.
+    _add 'swaggerUi.load();'.
+    _add '</script>'.
+    _add '</body>'.
+    _add '</html>'.
+
+  ENDMETHOD.
+
+
   METHOD json_reply.
 
     DATA: lo_writer TYPE REF TO cl_sxml_string_writer.
@@ -320,14 +462,6 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     ENDLOOP.
 
 * todo, error if no handler found
-
-  ENDMETHOD.
-
-
-  METHOD serve_spec.
-
-* todo
-    BREAK-POINT.
 
   ENDMETHOD.
 
