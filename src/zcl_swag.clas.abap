@@ -1,36 +1,39 @@
-class ZCL_SWAG definition
-  public
-  create public .
+CLASS zcl_swag DEFINITION
+  PUBLIC
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  types:
-    BEGIN OF ty_url,
+    TYPES:
+      BEGIN OF ty_url,
         regex       TYPE string,
         group_names TYPE STANDARD TABLE OF seosconame WITH DEFAULT KEY,
-      END OF ty_url .
-  types:
-    BEGIN OF ty_meta,
+      END OF ty_url.
+    TYPES:
+      BEGIN OF ty_meta,
         summary     TYPE string,
         description TYPE string,
         url         TYPE ty_url,
         method      TYPE string,
         handler     TYPE string,
-      END OF ty_meta .
+      END OF ty_meta.
+    TYPES: ty_meta_tt TYPE STANDARD TABLE OF ty_meta WITH DEFAULT KEY.
 
-  methods CONSTRUCTOR
-    importing
-      !II_SERVER type ref to IF_HTTP_SERVER .
-  methods REGISTER
-    importing
-      !II_HANDLER type ref to ZIF_SWAG_HANDLER .
-  methods RUN .
-  methods GENERATE_UI
-    returning
-      value(RV_UI) type STRING .
-  methods GENERATE_SPEC
-    returning
-      value(RV_SPEC) type STRING .
+    METHODS constructor
+      IMPORTING
+        !ii_server TYPE REF TO if_http_server.
+    METHODS register
+      IMPORTING
+        !ii_handler TYPE REF TO zif_swag_handler.
+    METHODS run .
+    METHODS generate_ui
+      IMPORTING
+        !iv_url      TYPE string
+      RETURNING
+        VALUE(rv_ui) TYPE string.
+    METHODS generate_spec
+      RETURNING
+        VALUE(rv_spec) TYPE string.
   PROTECTED SECTION.
 PRIVATE SECTION.
 
@@ -321,6 +324,8 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     _add '  }'.
     _add '}'.
 
+mi_server->response->set_cdata( rv_spec ).
+
   ENDMETHOD.
 
 
@@ -381,6 +386,10 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     _add '</body>'.
     _add '</html>'.
 
+    REPLACE FIRST OCCURRENCE OF 'swagger.json' IN rv_ui WITH iv_url.
+
+    mi_server->response->set_cdata( rv_ui ).
+
   ENDMETHOD.
 
 
@@ -414,26 +423,27 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     DATA: ls_meta LIKE LINE OF mt_meta.
 
+    LOOP AT ii_handler->meta( ) INTO ls_meta-meta.
+      ls_meta-obj = ii_handler.
 
-    ls_meta-obj = ii_handler.
+      DATA(lo_obj) = CAST cl_abap_objectdescr(
+        cl_abap_objectdescr=>describe_by_object_ref( ii_handler ) ).
 
-    ls_meta-meta = ii_handler->meta( ).
+      ls_meta-classname = lo_obj->absolute_name+7.
 
-    DATA(lo_obj) = CAST cl_abap_objectdescr(
-      cl_abap_objectdescr=>describe_by_object_ref( ii_handler ) ).
+      SELECT * FROM seosubcodf
+        INTO TABLE ls_meta-parameters
+        WHERE clsname = ls_meta-classname
+        AND cmpname = ls_meta-meta-handler
+        ORDER BY PRIMARY KEY.
+      ASSERT sy-subrc = 0.
 
-    ls_meta-classname = lo_obj->absolute_name+7.
+      validate_parameters( ls_meta-parameters ).
 
-    SELECT * FROM seosubcodf
-      INTO TABLE ls_meta-parameters
-      WHERE clsname = ls_meta-classname
-      AND cmpname = ls_meta-meta-handler
-      ORDER BY PRIMARY KEY.
-    ASSERT sy-subrc = 0.
+      APPEND ls_meta TO mt_meta.
 
-    validate_parameters( ls_meta-parameters ).
-
-    APPEND ls_meta TO mt_meta.
+      CLEAR ls_meta.
+    ENDLOOP.
 
   ENDMETHOD.
 
