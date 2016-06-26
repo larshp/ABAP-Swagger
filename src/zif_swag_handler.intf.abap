@@ -1,8 +1,7 @@
-interface ZIF_SWAG_HANDLER
-  public .
+INTERFACE zif_swag_handler
+  PUBLIC.
 
-
-  methods META
-    returning
-      value(RT_META) type ZCL_SWAG=>TY_META_TT .
-endinterface.
+  METHODS meta
+    RETURNING
+      VALUE(rt_meta) TYPE zcl_swag=>ty_meta_tt.
+ENDINTERFACE.
