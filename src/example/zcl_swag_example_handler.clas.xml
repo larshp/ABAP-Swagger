@@ -44,7 +44,15 @@
     <RISK_LEVEL>0</RISK_LEVEL>
     <WITHIN_PACKAGE/>
    </VSEOCLASS>
-   <TPOOL/>
+   <TPOOL>
+    <item>
+     <ID>I</ID>
+     <KEY>001</KEY>
+     <ENTRY>this is the description</ENTRY>
+     <LENGTH>46</LENGTH>
+     <SPLIT/>
+    </item>
+   </TPOOL>
   </asx:values>
  </asx:abap>
 </abapGit>
