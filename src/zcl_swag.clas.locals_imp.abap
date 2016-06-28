@@ -2,7 +2,7 @@
 *"* local helper classes, interface definitions and type
 *"* declarations
 
-CLASS lcl_map_type DEFINITION.
+CLASS lcl_map_type DEFINITION FINAL.
 
   PUBLIC SECTION.
     METHODS:
@@ -53,21 +53,48 @@ CLASS lcl_map_type IMPLEMENTATION.
 
     CASE io_typedescr->type_kind.
       WHEN cl_abap_typedescr=>typekind_string
-          OR cl_abap_typedescr=>typekind_char.
+          OR cl_abap_typedescr=>typekind_char
+          OR cl_abap_typedescr=>typekind_date
+          OR cl_abap_typedescr=>typekind_time
+          OR cl_abap_typedescr=>typekind_hex.
         rv_type = '"type":"string"'.
+      WHEN cl_abap_typedescr=>typekind_int1.
+        rv_type = '"type":"integer"'.
       WHEN OTHERS.
-        BREAK-POINT.
+        ASSERT 0 = 1.
     ENDCASE.
 
   ENDMETHOD.
 
   METHOD map_structure.
-* todo
-    rv_type = '"schema":{"type":"object", "properties":{ "FOO":{ "type":"string" }, "BAR":{ "type":"string" } }}'.
+
+    DATA: lv_index  TYPE i,
+          lo_struct TYPE REF TO cl_abap_structdescr.
+
+
+    lo_struct ?= io_typedescr.
+    DATA(lt_components) = lo_struct->get_components( ).
+
+    rv_type = '"schema":{"type":"object", "properties":{'.
+
+    LOOP AT lt_components ASSIGNING FIELD-SYMBOL(<ls_component>).
+      lv_index = sy-tabix.
+
+      DATA(lv_type) = map_internal( <ls_component>-type ).
+      rv_type = rv_type && '"' && <ls_component>-name && '":{ ' && lv_type && ' }'.
+
+      IF lv_index <> lines( lt_components ).
+        rv_type = rv_type && ','.
+      ENDIF.
+    ENDLOOP.
+
+    rv_type = rv_type && '}}'.
+
   ENDMETHOD.
 
   METHOD map_table.
-    BREAK-POINT.
+* todo
+    ASSERT 0 = 1.
   ENDMETHOD.
 
   METHOD get_typedescr.

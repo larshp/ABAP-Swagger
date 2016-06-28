@@ -1,4 +1,4 @@
-CLASS ltcl_test DEFINITION FOR TESTING
+CLASS ltcl_swag DEFINITION FOR TESTING
     DURATION SHORT
     RISK LEVEL HARMLESS
     FINAL.
@@ -22,7 +22,7 @@ CLASS ltcl_test DEFINITION FOR TESTING
 
 ENDCLASS.       "ltcl_Register
 
-CLASS ltcl_test IMPLEMENTATION.
+CLASS ltcl_swag IMPLEMENTATION.
 
   METHOD to_string.
 
@@ -43,6 +43,10 @@ CLASS ltcl_test IMPLEMENTATION.
         ii_server = me.
   ENDMETHOD.
 
+  METHOD if_http_request~get_method.
+    method = zcl_swag=>c_method-get.
+  ENDMETHOD.
+
   METHOD if_http_entity~get_header_field.
     CASE name.
       WHEN '~path'.
@@ -57,7 +61,7 @@ CLASS ltcl_test IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD if_http_entity~get_cdata.
-    data = '{"IV_BAR":"bar"}'.
+    data = '"bar"'.
   ENDMETHOD.
 
   METHOD test.
