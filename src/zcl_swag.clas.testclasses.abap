@@ -17,8 +17,7 @@ CLASS ltcl_test DEFINITION FOR TESTING
       test FOR TESTING.
 
     CLASS-METHODS: to_string
-      IMPORTING
-                iv_xstr       TYPE xstring
+      IMPORTING iv_xstr       TYPE xstring
       RETURNING VALUE(rv_str) TYPE string.
 
 ENDCLASS.       "ltcl_Register
@@ -71,6 +70,76 @@ CLASS ltcl_test IMPLEMENTATION.
     cl_abap_unit_assert=>assert_char_cp(
       act = mv_reply
       exp = '*foobar*' ).
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+CLASS ltcl_map_type DEFINITION FOR TESTING
+    DURATION SHORT
+    RISK LEVEL HARMLESS
+    FINAL.
+
+  PUBLIC SECTION.
+    INTERFACES:
+      if_http_server PARTIALLY IMPLEMENTED.
+
+  PRIVATE SECTION.
+    DATA: mo_map TYPE REF TO lcl_map_type.
+
+    METHODS:
+      setup,
+      string FOR TESTING,
+      char FOR TESTING,
+      structure FOR TESTING.
+
+ENDCLASS.
+
+CLASS ltcl_map_type IMPLEMENTATION.
+
+  METHOD setup.
+    CREATE OBJECT mo_map.
+  ENDMETHOD.
+
+  METHOD string.
+
+    DATA: ls_parm TYPE seosubcodf.
+
+    ls_parm-type = 'STRING'.
+
+    DATA(lv_type) = mo_map->map( ls_parm ).
+
+    cl_abap_unit_assert=>assert_equals(
+      act = lv_type
+      exp = '"type":"string"' ).
+
+  ENDMETHOD.
+
+  METHOD char.
+
+    DATA: ls_parm TYPE seosubcodf.
+
+    ls_parm-type = 'ZAGS_REPO_NAME'.
+
+    DATA(lv_type) = mo_map->map( ls_parm ).
+
+    cl_abap_unit_assert=>assert_equals(
+      act = lv_type
+      exp = '"type":"string"' ).
+
+  ENDMETHOD.
+
+  METHOD structure.
+
+    DATA: ls_parm TYPE seosubcodf.
+
+    ls_parm-type = 'USR02'.
+
+    DATA(lv_type) = mo_map->map( ls_parm ).
+
+    cl_abap_unit_assert=>assert_char_cp(
+      act = lv_type
+      exp = '*"type":"object"*' ).
 
   ENDMETHOD.
 

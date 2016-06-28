@@ -1,49 +1,57 @@
-CLASS zcl_swag DEFINITION
-  PUBLIC
-  CREATE PUBLIC .
+class ZCL_SWAG definition
+  public
+  create public .
 
-  PUBLIC SECTION.
+public section.
 
-    TYPES:
-      BEGIN OF ty_url,
+  types:
+    BEGIN OF ty_url,
         regex       TYPE string,
         group_names TYPE STANDARD TABLE OF seosconame WITH DEFAULT KEY,
       END OF ty_url .
-    TYPES:
-      BEGIN OF ty_meta,
+  types:
+    BEGIN OF ty_meta,
         summary TYPE string,
         url     TYPE ty_url,
         method  TYPE string,
         handler TYPE string,
         produce TYPE string,
       END OF ty_meta .
-    TYPES:
-      ty_meta_tt TYPE STANDARD TABLE OF ty_meta WITH DEFAULT KEY .
+  types:
+    ty_meta_tt TYPE STANDARD TABLE OF ty_meta WITH DEFAULT KEY .
 
-    CONSTANTS: BEGIN OF c_content_type,
+  constants:
+    BEGIN OF c_content_type,
                  text_plain TYPE string VALUE 'text/plain' ##NO_TEXT,
-               END OF c_content_type.
+               END OF c_content_type .
+  constants:
+    BEGIN OF c_method,
+                 get  TYPE string VALUE 'GET',
+                 post TYPE string VALUE 'POST',
+                 put  TYPE string VALUE 'PUT',
+               END OF c_method .
 
-    METHODS constructor
-      IMPORTING
-        !ii_server TYPE REF TO if_http_server
-        !iv_base   TYPE string OPTIONAL .
-    METHODS generate_spec
-      IMPORTING
-        !iv_title       TYPE string
-        !iv_description TYPE string
-      RETURNING
-        VALUE(rv_spec)  TYPE string .
-    METHODS generate_ui
-      IMPORTING
-        !iv_json_url TYPE string
-        !iv_dist     TYPE string DEFAULT ''
-      RETURNING
-        VALUE(rv_ui) TYPE string .
-    METHODS register
-      IMPORTING
-        !ii_handler TYPE REF TO zif_swag_handler .
-    METHODS run .
+  methods CONSTRUCTOR
+    importing
+      !II_SERVER type ref to IF_HTTP_SERVER
+      !IV_BASE type STRING optional .
+  methods GENERATE_SPEC
+    importing
+      !IV_TITLE type CLIKE
+      !IV_DESCRIPTION type CLIKE
+    returning
+      value(RV_SPEC) type STRING .
+  methods GENERATE_UI
+    importing
+      !IV_JSON_URL type STRING
+      !IV_DIST type STRING default ''
+      !IV_TITLE type CLIKE default ''
+    returning
+      value(RV_UI) type STRING .
+  methods REGISTER
+    importing
+      !II_HANDLER type ref to ZIF_SWAG_HANDLER .
+  methods RUN .
   PROTECTED SECTION.
 private section.
 
@@ -88,12 +96,6 @@ private section.
     importing
       !IS_META type TY_META_INTERNAL
       !IR_REF type ref to DATA .
-  methods TEXT_REPLY
-    importing
-      !IS_META type TY_META_INTERNAL
-      !IT_PARAMETERS type ABAP_PARMBIND_TAB
-    returning
-      value(RV_XSTR) type XSTRING .
   methods JSON_REPLY
     importing
       !IS_META type TY_META_INTERNAL
@@ -110,6 +112,12 @@ private section.
       !IS_META type TY_META_INTERNAL
     returning
       value(RV_PATH) type STRING .
+  methods TEXT_REPLY
+    importing
+      !IS_META type TY_META_INTERNAL
+      !IT_PARAMETERS type ABAP_PARMBIND_TAB
+    returning
+      value(RV_XSTR) type XSTRING .
   methods VALIDATE_PARAMETERS
     importing
       !IT_PARAMETERS type TY_PARAMETERS_TT .
@@ -152,7 +160,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
   METHOD constructor.
 
     mi_server = ii_server.
-    mv_base = iv_base.
+    mv_base   = iv_base.
 
   ENDMETHOD.
 
@@ -161,30 +169,14 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     DATA: lo_struct     TYPE REF TO cl_abap_structdescr,
           lt_components TYPE cl_abap_structdescr=>component_table,
-          lo_typedescr  TYPE REF TO cl_abap_typedescr,
-          lv_name       TYPE string.
+          lo_typedescr  TYPE REF TO cl_abap_typedescr.
 
 
     LOOP AT is_meta-parameters ASSIGNING FIELD-SYMBOL(<ls_parameter>).
       APPEND INITIAL LINE TO lt_components ASSIGNING FIELD-SYMBOL(<ls_component>).
       <ls_component>-name = <ls_parameter>-sconame.
 
-      cl_abap_typedescr=>describe_by_name(
-        EXPORTING
-          p_name         = <ls_parameter>-type
-        RECEIVING
-          p_descr_ref    = lo_typedescr
-        EXCEPTIONS
-          type_not_found = 1
-          OTHERS         = 2 ).
-      IF sy-subrc <> 0.
-* try looking in the class
-        CONCATENATE
-          '\CLASS=' is_meta-classname
-          '\TYPE=' <ls_parameter>-type
-          INTO lv_name.
-        lo_typedescr = cl_abap_typedescr=>describe_by_name( lv_name ).
-      ENDIF.
+      lo_typedescr = lcl_map_type=>get_typedescr( <ls_parameter> ).
 
       <ls_component>-type ?= lo_typedescr.
     ENDLOOP.
@@ -286,7 +278,8 @@ CLASS ZCL_SWAG IMPLEMENTATION.
         INTO rv_spec ##NO_TEXT.
     END-OF-DEFINITION.
 
-    DATA: lv_add TYPE string.
+    DATA: lv_index TYPE i,
+          lv_add   TYPE string.
 
 
     _add '{'.
@@ -316,6 +309,8 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     _add '  "paths":{'.
 
     LOOP AT mt_meta ASSIGNING FIELD-SYMBOL(<ls_meta>).
+      lv_index = sy-tabix.
+
       lv_add = |    "{ spec_path( <ls_meta> ) }":\{|.
       _add lv_add.
       lv_add = |      "{ to_lower( <ls_meta>-meta-method ) }":\{|.
@@ -338,19 +333,19 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
       _add '        ],'.
       _add '        "responses":{'.
-      _add '          "200":{  '.
-*      _add '            "description":"response description",'.
-*      _add '            "schema":{  '.
-*      _add '              "$ref":"#/definitions/Response"'.
-*      _add '            }'.
+      _add '          "500":{'.
+      _add '            "description":"error"'.
       _add '          }'.
       _add '        }'.
       _add '      }'.
-      _add '    },'.
+      _add '    }'.
+      IF lv_index <> lines( mt_meta ).
+        _add ','.
+      ENDIF.
     ENDLOOP.
 
     _add '  },'.
-*    _add '  "definitions":{'.
+    _add '  "definitions":{'.
 *    _add '    "Response":{'.
 *    _add '      "type":"object",'.
 *    _add '      "properties":{  '.
@@ -362,7 +357,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 *    _add '        }'.
 *    _add '      }'.
 *    _add '    }'.
-*    _add '  }'.
+    _add '  }'.
     _add '}'.
 
     mi_server->response->set_cdata( rv_spec ).
@@ -381,7 +376,15 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     _add '<html>'.
     _add '<head>'.
     _add '<meta charset="UTF-8">'.
-    _add '<title>Swagger UI</title>'.
+
+    _add '<title>'.
+    IF iv_title IS INITIAL.
+      _add 'Swagger UI'.
+    ELSE.
+      _add iv_title.
+    ENDIF.
+    _add '</title>'.
+
     _add '<link rel="icon" href="iv_dist/images/favicon-32x32.png" sizes="32x32" />'.
     _add '<link rel="icon" href="iv_dist/images/favicon-16x16.png" sizes="16x16" />'.
     _add '<link href="iv_dist/css/typography.css" media="screen" rel="stylesheet" type="text/css"/>'.
@@ -552,25 +555,37 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     LOOP AT is_meta-parameters ASSIGNING FIELD-SYMBOL(<ls_parameter>)
         WHERE pardecltyp = c_parm_kind-importing.
-      APPEND '{'                 TO lt_string.
+
+      APPEND '{' TO lt_string.
+
       APPEND |"name":"{ <ls_parameter>-sconame }",|  TO lt_string.
 
       READ TABLE is_meta-meta-url-group_names FROM <ls_parameter>-sconame
         TRANSPORTING NO FIELDS.
       IF sy-subrc = 0.
         APPEND '"in":"path",' TO lt_string.
+      ELSEIF is_meta-meta-method = c_method-get.
+        APPEND '"in":"query",' TO lt_string.
       ELSE.
-* todo:
-* query for GET?
-* body for POST?
-        APPEND '"in":"formData",' TO lt_string.
+        APPEND '"in":"body",' TO lt_string.
       ENDIF.
 
       APPEND '"description":"",' TO lt_string.
-      APPEND '"type":"string",'  TO lt_string.
+
+      DATA(lo_map) = NEW lcl_map_type( ).
+      DATA(lv_type) = lo_map->map( <ls_parameter> ).
+      APPEND |{ lv_type },| TO lt_string.
+*      APPEND |"type":"string",|  TO lt_string.
+*      APPEND |"schema":\{{ lv_type }\},| TO lt_string.
+
       APPEND '"required":true'   TO lt_string.
-      APPEND '},'                TO lt_string.
+      APPEND '},' TO lt_string.
     ENDLOOP.
+    IF sy-subrc = 0.
+* fix the comma
+      DELETE lt_string INDEX lines( lt_string ).
+      APPEND '}' TO lt_string.
+    ENDIF.
 
     APPEND '],' TO lt_string.
 

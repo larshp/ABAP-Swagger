@@ -41,7 +41,7 @@ CLASS ZCL_SWAG_EXAMPLE_HANDLER IMPLEMENTATION.
     <ls_meta>-summary   = 'this is the description'(001).
     <ls_meta>-url-regex = '/swag/(\w*)/'.
     APPEND 'IV_FOO' TO <ls_meta>-url-group_names.
-    <ls_meta>-method    = 'GET'.
+    <ls_meta>-method    = zcl_swag=>c_method-get.
     <ls_meta>-handler   = 'THE_REAL_STUFF'.
 
   ENDMETHOD.
