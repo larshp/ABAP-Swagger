@@ -37,7 +37,10 @@ CLASS ZCL_SWAG_EXAMPLE_HANDLER IMPLEMENTATION.
 
   METHOD zif_swag_handler~meta.
 
-    APPEND INITIAL LINE TO rt_meta ASSIGNING FIELD-SYMBOL(<ls_meta>).
+    FIELD-SYMBOLS: <ls_meta> LIKE LINE OF rt_meta.
+
+
+    APPEND INITIAL LINE TO rt_meta ASSIGNING <ls_meta>.
     <ls_meta>-summary   = 'this is the description'(001).
     <ls_meta>-url-regex = '/swag/(\w*)/'.
     APPEND 'IV_FOO' TO <ls_meta>-url-group_names.

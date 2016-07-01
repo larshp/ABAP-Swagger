@@ -8,31 +8,36 @@ CLASS lcl_map_type DEFINITION FINAL.
     METHODS:
       map
         IMPORTING is_parm        TYPE seosubcodf
-        RETURNING VALUE(rv_type) TYPE string,
+        RETURNING value(rv_type) TYPE string,
       map_internal
         IMPORTING io_typedescr   TYPE REF TO cl_abap_typedescr
-        RETURNING VALUE(rv_type) TYPE string,
+        RETURNING value(rv_type) TYPE string,
       map_structure
         IMPORTING io_typedescr   TYPE REF TO cl_abap_typedescr
-        RETURNING VALUE(rv_type) TYPE string,
+        RETURNING value(rv_type) TYPE string,
       map_table
         IMPORTING io_typedescr   TYPE REF TO cl_abap_typedescr
-        RETURNING VALUE(rv_type) TYPE string,
+        RETURNING value(rv_type) TYPE string,
       map_element
         IMPORTING io_typedescr   TYPE REF TO cl_abap_typedescr
-        RETURNING VALUE(rv_type) TYPE string.
+        RETURNING value(rv_type) TYPE string.
 
     CLASS-METHODS: get_typedescr
       IMPORTING is_parm             TYPE seosubcodf
-      RETURNING VALUE(ro_typedescr) TYPE REF TO cl_abap_typedescr.
+      RETURNING value(ro_typedescr) TYPE REF TO cl_abap_typedescr.
 
-ENDCLASS.
+ENDCLASS.                    "lcl_map_type DEFINITION
 
+*----------------------------------------------------------------------*
+*       CLASS lcl_map_type IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
 CLASS lcl_map_type IMPLEMENTATION.
 
   METHOD map.
     rv_type = map_internal( get_typedescr( is_parm ) ).
-  ENDMETHOD.
+  ENDMETHOD.                    "map
 
   METHOD map_internal.
 
@@ -47,7 +52,7 @@ CLASS lcl_map_type IMPLEMENTATION.
         ASSERT 0 = 1.
     ENDCASE.
 
-  ENDMETHOD.
+  ENDMETHOD.                    "map_internal
 
   METHOD map_element.
 
@@ -64,23 +69,27 @@ CLASS lcl_map_type IMPLEMENTATION.
         ASSERT 0 = 1.
     ENDCASE.
 
-  ENDMETHOD.
+  ENDMETHOD.                    "map_element
 
   METHOD map_structure.
 
-    DATA: lv_index  TYPE i,
-          lo_struct TYPE REF TO cl_abap_structdescr.
+    DATA: lv_index      TYPE i,
+          lv_type       type string,
+          lt_components TYPE cl_abap_structdescr=>component_table,
+          lo_struct     TYPE REF TO cl_abap_structdescr.
+
+    FIELD-SYMBOLS: <ls_component> LIKE LINE OF lt_components.
 
 
     lo_struct ?= io_typedescr.
-    DATA(lt_components) = lo_struct->get_components( ).
+    lt_components = lo_struct->get_components( ).
 
     rv_type = '"schema":{"type":"object", "properties":{'.
 
-    LOOP AT lt_components ASSIGNING FIELD-SYMBOL(<ls_component>).
+    LOOP AT lt_components ASSIGNING <ls_component>.
       lv_index = sy-tabix.
 
-      DATA(lv_type) = map_internal( <ls_component>-type ).
+      lv_type = map_internal( <ls_component>-type ).
       rv_type = rv_type && '"' && <ls_component>-name && '":{ ' && lv_type && ' }'.
 
       IF lv_index <> lines( lt_components ).
@@ -90,12 +99,12 @@ CLASS lcl_map_type IMPLEMENTATION.
 
     rv_type = rv_type && '}}'.
 
-  ENDMETHOD.
+  ENDMETHOD.                    "map_structure
 
   METHOD map_table.
 * todo
     ASSERT 0 = 1.
-  ENDMETHOD.
+  ENDMETHOD.                    "map_table
 
   METHOD get_typedescr.
 
@@ -120,6 +129,6 @@ CLASS lcl_map_type IMPLEMENTATION.
       ro_typedescr = cl_abap_typedescr=>describe_by_name( lv_name ).
     ENDIF.
 
-  ENDMETHOD.
+  ENDMETHOD.                    "get_typedescr
 
-ENDCLASS.
+ENDCLASS.                    "lcl_map_type IMPLEMENTATION

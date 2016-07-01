@@ -133,18 +133,19 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     DATA: ls_parameter LIKE LINE OF rt_parameters,
           lr_dref      TYPE REF TO data.
 
-    FIELD-SYMBOLS: <lg_comp>  TYPE any,
+    FIELD-SYMBOLS: <ls_parameter> LIKE LINE OF is_meta-parameters,
+                   <lg_comp>  TYPE any,
                    <lg_struc> TYPE any.
 
 
     lr_dref = create_data( is_meta ).
     ASSIGN lr_dref->* TO <lg_struc>.
 
-    LOOP AT is_meta-parameters ASSIGNING FIELD-SYMBOL(<ls_parameter>).
+    LOOP AT is_meta-parameters ASSIGNING <ls_parameter>.
       ASSIGN COMPONENT <ls_parameter>-sconame OF STRUCTURE <lg_struc> TO <lg_comp>.
       ASSERT sy-subrc = 0.
       ls_parameter-name  = <ls_parameter>-sconame.
-      ls_parameter-value = REF #( <lg_comp> ).
+      GET REFERENCE OF <lg_comp> INTO ls_parameter-value.
       INSERT ls_parameter INTO TABLE rt_parameters.
     ENDLOOP.
 
@@ -171,9 +172,12 @@ CLASS ZCL_SWAG IMPLEMENTATION.
           lt_components TYPE cl_abap_structdescr=>component_table,
           lo_typedescr  TYPE REF TO cl_abap_typedescr.
 
+    FIELD-SYMBOLS: <ls_component> LIKE LINE OF lt_components,
+                   <ls_parameter> LIKE LINE OF is_meta-parameters.
 
-    LOOP AT is_meta-parameters ASSIGNING FIELD-SYMBOL(<ls_parameter>).
-      APPEND INITIAL LINE TO lt_components ASSIGNING FIELD-SYMBOL(<ls_component>).
+
+    LOOP AT is_meta-parameters ASSIGNING <ls_parameter>.
+      APPEND INITIAL LINE TO lt_components ASSIGNING <ls_component>.
       <ls_component>-name = <ls_parameter>-sconame.
 
       lo_typedescr = lcl_map_type=>get_typedescr( <ls_parameter> ).
@@ -190,15 +194,18 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
   METHOD from_input.
 
-    DATA: lv_json TYPE xstring.
+    DATA: lv_cdata  TYPE string,
+          lo_writer TYPE REF TO cl_sxml_string_writer,
+          lv_json   TYPE xstring.
 
-    FIELD-SYMBOLS: <lg_comp>  TYPE any,
-                   <lg_struc> TYPE any.
+    FIELD-SYMBOLS: <ls_parameter> LIKE LINE OF is_meta-parameters,
+                   <lg_comp>      TYPE any,
+                   <lg_struc>     TYPE any.
 
 
     ASSIGN ir_ref->* TO <lg_struc>.
 
-    LOOP AT is_meta-parameters ASSIGNING FIELD-SYMBOL(<ls_parameter>)
+    LOOP AT is_meta-parameters ASSIGNING <ls_parameter>
         WHERE pardecltyp = c_parm_kind-importing.
       READ TABLE is_meta-meta-url-group_names FROM <ls_parameter>-sconame
         TRANSPORTING NO FIELDS.
@@ -210,10 +217,10 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       ASSIGN COMPONENT <ls_parameter>-sconame OF STRUCTURE <lg_struc> TO <lg_comp>.
       ASSERT sy-subrc = 0.
 
-      DATA(lv_cdata) = mi_server->request->get_cdata( ).
+      lv_cdata = mi_server->request->get_cdata( ).
       lv_cdata = '{"DATA":' && lv_cdata && '}'.
 
-      DATA(lo_writer) = cl_sxml_string_writer=>create( type = if_sxml=>co_xt_json ).
+      lo_writer = cl_sxml_string_writer=>create( type = if_sxml=>co_xt_json ).
 
       CALL TRANSFORMATION demo_json_xml_to_upper
         SOURCE XML lv_cdata
