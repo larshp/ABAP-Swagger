@@ -73,9 +73,9 @@ CLASS zcl_swag DEFINITION
     CONSTANTS:
       BEGIN OF c_parm_kind,
         importing TYPE seopardecl VALUE '0',
-        exporting TYPE seopardecl VALUE '1',	
-        changing  TYPE seopardecl VALUE '2',	
-        returning TYPE seopardecl VALUE '3',	
+        exporting TYPE seopardecl VALUE '1',
+        changing  TYPE seopardecl VALUE '2',
+        returning TYPE seopardecl VALUE '3',
       END OF c_parm_kind.
 
     METHODS build_parameters
