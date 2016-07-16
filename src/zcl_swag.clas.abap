@@ -547,6 +547,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
               it_parameters = lt_parameters ).
         ENDCASE.
 
+        mi_server->response->set_compression( ).
         mi_server->response->set_data( lv_data ).
 
       ENDIF.
