@@ -247,7 +247,8 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       ENDIF.
     END-OF-DEFINITION.
 
-    DATA: lv_component TYPE string,
+    DATA: lv_path      TYPE string,
+          lv_component TYPE string,
           lv_match1    TYPE string,
           lv_match2    TYPE string,
           lv_match3    TYPE string,
@@ -260,7 +261,9 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     ASSIGN ir_ref->* TO <lg_struc>.
 
-    DATA(lv_path) = mi_server->request->get_header_field( '~path' ).
+    lv_path = mi_server->request->get_header_field( '~path' ).
+    lv_path = cl_http_utility=>unescape_url( lv_path ).
+
     FIND REGEX is_meta-meta-url-regex IN lv_path
       SUBMATCHES lv_match1 lv_match2 lv_match3 lv_match4 lv_match5.
 
@@ -527,6 +530,8 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
 
     lv_path = mi_server->request->get_header_field( '~path' ).
+    lv_path = cl_http_utility=>unescape_url( lv_path ).
+
     lv_method = mi_server->request->get_method( ).
 
     LOOP AT mt_meta ASSIGNING FIELD-SYMBOL(<ls_meta>).
