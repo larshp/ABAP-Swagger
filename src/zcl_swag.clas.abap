@@ -210,6 +210,8 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
       IF <ls_parameter>-type = 'STRING'.
         <lg_comp> = mi_server->request->get_cdata( ).
+      ELSEIF <ls_parameter>-type = 'XSTRING'.
+        <lg_comp> = mi_server->request->get_data( ).
       ELSE.
         lv_cdata = mi_server->request->get_cdata( ).
         lv_cdata = '{"DATA":' && lv_cdata && '}'.
