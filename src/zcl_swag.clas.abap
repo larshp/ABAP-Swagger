@@ -28,21 +28,11 @@ CLASS zcl_swag DEFINITION
 
     METHODS constructor
       IMPORTING
-        !ii_server TYPE REF TO if_http_server
-        !iv_base   TYPE string OPTIONAL.
-    METHODS generate_spec
-      IMPORTING
-        !iv_title       TYPE clike
-        !iv_description TYPE clike
-      RETURNING
-        VALUE(rv_spec)  TYPE string.
-    METHODS generate_ui
-      IMPORTING
-        !iv_json_url TYPE string
-        !iv_dist     TYPE string DEFAULT ''
-        !iv_title    TYPE clike DEFAULT ''
-      RETURNING
-        VALUE(rv_ui) TYPE string.
+        !ii_server       TYPE REF TO if_http_server
+        !iv_base         TYPE string
+        !iv_swagger_json TYPE string DEFAULT '/swagger.json'
+        !iv_swagger_html TYPE string DEFAULT '/swagger.html'
+        !iv_title        TYPE string.
     METHODS register
       IMPORTING
         !ii_handler TYPE REF TO zif_swag_handler.
@@ -72,6 +62,9 @@ CLASS zcl_swag DEFINITION
         changing  TYPE seopardecl VALUE '2',
         returning TYPE seopardecl VALUE '3',
       END OF c_parm_kind.
+    DATA mv_swagger_json TYPE string.
+    DATA mv_swagger_html TYPE string.
+    DATA mv_title TYPE string.
 
     METHODS build_parameters
       IMPORTING
@@ -91,6 +84,19 @@ CLASS zcl_swag DEFINITION
       IMPORTING
         !is_meta TYPE ty_meta_internal
         !ir_ref  TYPE REF TO data.
+    METHODS generate_spec
+      IMPORTING
+        !iv_title       TYPE clike
+        !iv_description TYPE clike
+      RETURNING
+        VALUE(rv_spec)  TYPE string.
+    METHODS generate_ui
+      IMPORTING
+        !iv_json_url TYPE string
+        !iv_dist     TYPE string DEFAULT ''
+        !iv_title    TYPE clike DEFAULT ''
+      RETURNING
+        VALUE(rv_ui) TYPE string.
     METHODS json_reply
       IMPORTING
         !is_meta       TYPE ty_meta_internal
@@ -151,8 +157,11 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
   METHOD constructor.
 
-    mi_server = ii_server.
-    mv_base   = iv_base.
+    mi_server       = ii_server.
+    mv_base         = iv_base.
+    mv_swagger_json = iv_swagger_json.
+    mv_swagger_html = iv_swagger_html.
+    mv_title        = iv_title.
 
   ENDMETHOD.
 
@@ -566,8 +575,19 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     lv_path = mi_server->request->get_header_field( '~path' ).
     lv_path = cl_http_utility=>unescape_url( lv_path ).
-
     lv_method = mi_server->request->get_method( ).
+
+    IF lv_path = mv_base && mv_swagger_html.
+      generate_ui(
+        iv_json_url = mv_base && mv_swagger_json
+        iv_title    = mv_title && ' - Swagger' ).
+      RETURN.
+    ELSEIF lv_path = mv_base && mv_swagger_json.
+      generate_spec(
+        iv_title       = mv_title
+        iv_description = mv_title && ' REST functions' ).
+      RETURN.
+    ENDIF.
 
     LOOP AT mt_meta ASSIGNING FIELD-SYMBOL(<ls_meta>).
       IF lv_method <> <ls_meta>-meta-method.

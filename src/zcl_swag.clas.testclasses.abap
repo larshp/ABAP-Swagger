@@ -53,7 +53,9 @@ CLASS ltcl_swag IMPLEMENTATION.
 
     CREATE OBJECT mo_swag
       EXPORTING
-        ii_server = me.
+        ii_server = me
+        iv_base   = ''
+        iv_title  = 'test'.
   ENDMETHOD.                    "setup
 
   METHOD if_http_request~get_method.
