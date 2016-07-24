@@ -23,7 +23,7 @@ CLASS ltcl_swag DEFINITION FOR TESTING
 
     CLASS-METHODS: to_string
       IMPORTING iv_xstr       TYPE xstring
-      RETURNING value(rv_str) TYPE string.
+      RETURNING VALUE(rv_str) TYPE string.
 
 ENDCLASS.       "ltcl_Register
 
@@ -60,6 +60,10 @@ CLASS ltcl_swag IMPLEMENTATION.
     method = zcl_swag=>c_method-get.
   ENDMETHOD.                    "if_http_request~get_method
 
+  METHOD if_http_request~set_compression.
+    RETURN.
+  ENDMETHOD.
+
   METHOD if_http_entity~get_header_field.
     CASE name.
       WHEN '~path'.
@@ -74,8 +78,12 @@ CLASS ltcl_swag IMPLEMENTATION.
   ENDMETHOD.                    "if_http_entity~set_data
 
   METHOD if_http_entity~get_cdata.
-    data = '"bar"'.
+    data = 'bar'.
   ENDMETHOD.                    "if_http_entity~get_cdata
+
+  METHOD if_http_response~set_status.
+    RETURN.
+  ENDMETHOD.
 
   METHOD test.
 

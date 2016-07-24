@@ -283,9 +283,32 @@ CLASS ZCL_SWAG IMPLEMENTATION.
         INTO rv_spec ##NO_TEXT.
     END-OF-DEFINITION.
 
-    DATA: lv_index TYPE i,
-          lv_add   TYPE string.
+    TYPES: BEGIN OF ty_path,
+             path TYPE string,
+             meta LIKE mt_meta,
+           END OF ty_path.
 
+    DATA: lv_index     TYPE i,
+          lt_paths     TYPE TABLE OF ty_path,
+          lv_last_path TYPE abap_bool,
+          lv_last_meta TYPE abap_bool,
+          lv_path      TYPE string,
+          lv_add       TYPE string.
+
+    FIELD-SYMBOLS: <ls_path> LIKE LINE OF lt_paths,
+                   <ls_meta> LIKE LINE OF mt_meta.
+
+
+* handle path with multiple handlers(ie. GET and POST)
+    LOOP AT mt_meta ASSIGNING <ls_meta>.
+      lv_path = spec_path( <ls_meta> ).
+      READ TABLE lt_paths ASSIGNING <ls_path> WITH KEY path = lv_path.
+      IF sy-subrc <> 0.
+        APPEND INITIAL LINE TO lt_paths ASSIGNING <ls_path>.
+        <ls_path>-path = lv_path.
+      ENDIF.
+      APPEND <ls_meta> TO <ls_path>-meta.
+    ENDLOOP.
 
     _add '{'.
     _add '  "swagger":"2.0",'.
@@ -313,41 +336,51 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     _add '  ],'.
     _add '  "paths":{'.
 
-    LOOP AT mt_meta ASSIGNING FIELD-SYMBOL(<ls_meta>).
-      lv_index = sy-tabix.
+    LOOP AT lt_paths ASSIGNING <ls_path>.
+      lv_last_path = boolc( sy-tabix = lines( lt_paths ) ).
 
-      lv_add = |    "{ spec_path( <ls_meta> ) }":\{|.
-      _add lv_add.
-      lv_add = |      "{ to_lower( <ls_meta>-meta-method ) }":\{|.
-      _add lv_add.
-      lv_add = |        "summary":"{ <ls_meta>-meta-summary }",|.
-      _add lv_add.
-      lv_add = |        "description":"",|.
+      lv_add = |    "{ <ls_path>-path }":\{|.
       _add lv_add.
 
-      lv_add = spec_parameters( <ls_meta> ).
-      _add lv_add.
+      LOOP AT <ls_path>-meta ASSIGNING <ls_meta>.
+        lv_last_meta = boolc( sy-tabix = lines( <ls_path>-meta ) ).
 
-      _add '        "produces":['.
+        lv_add = |      "{ to_lower( <ls_meta>-meta-method ) }":\{|.
+        _add lv_add.
+        lv_add = |        "summary":"{ <ls_meta>-meta-summary }",|.
+        _add lv_add.
+        lv_add = |        "description":"",|.
+        _add lv_add.
 
-      READ TABLE <ls_meta>-parameters WITH KEY
-        pardecltyp = c_parm_kind-returning
-        type = 'STRING' TRANSPORTING NO FIELDS.
-      IF sy-subrc = 0.
-        _add '"text/plain"'.
-      ELSE.
-        _add '"application/json"'.
-      ENDIF.
+        lv_add = spec_parameters( <ls_meta> ).
+        _add lv_add.
 
-      _add '        ],'.
-      _add '        "responses":{'.
-      _add '          "500":{'.
-      _add '            "description":"error"'.
-      _add '          }'.
-      _add '        }'.
-      _add '      }'.
+        _add '        "produces":['.
+
+        READ TABLE <ls_meta>-parameters WITH KEY
+          pardecltyp = c_parm_kind-returning
+          type = 'STRING' TRANSPORTING NO FIELDS.
+        IF sy-subrc = 0.
+          _add '"text/plain"'.
+        ELSE.
+          _add '"application/json"'.
+        ENDIF.
+
+        _add '        ],'.
+        _add '        "responses":{'.
+        _add '          "500":{'.
+        _add '            "description":"error"'.
+        _add '          }'.
+        _add '        }'.
+        _add '      }'.
+
+        IF lv_last_meta = abap_false.
+          _add ','.
+        ENDIF.
+      ENDLOOP.
+
       _add '    }'.
-      IF lv_index <> lines( mt_meta ).
+      IF lv_last_path = abap_false.
         _add ','.
       ENDIF.
     ENDLOOP.

@@ -65,6 +65,8 @@ CLASS lcl_map_type IMPLEMENTATION.
         rv_type = '"type":"string"'.
       WHEN cl_abap_typedescr=>typekind_int1.
         rv_type = '"type":"integer"'.
+      WHEN cl_abap_typedescr=>typekind_xstring.
+        rv_type = '"type":"binary"'.
       WHEN OTHERS.
         ASSERT 0 = 1.
     ENDCASE.
