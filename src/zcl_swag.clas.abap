@@ -15,15 +15,10 @@ CLASS zcl_swag DEFINITION
         url     TYPE ty_url,
         method  TYPE string,
         handler TYPE string,
-        produce TYPE string,
       END OF ty_meta.
     TYPES:
       ty_meta_tt TYPE STANDARD TABLE OF ty_meta WITH DEFAULT KEY.
 
-    CONSTANTS:
-      BEGIN OF c_content_type,
-        text_plain TYPE string VALUE 'text/plain' ##NO_TEXT,
-      END OF c_content_type.
     CONSTANTS:
       BEGIN OF c_method,
         get  TYPE string VALUE 'GET',
@@ -99,9 +94,7 @@ CLASS zcl_swag DEFINITION
     METHODS json_reply
       IMPORTING
         !is_meta       TYPE ty_meta_internal
-        !it_parameters TYPE abap_parmbind_tab
-      RETURNING
-        VALUE(rv_json) TYPE xstring.
+        !it_parameters TYPE abap_parmbind_tab.
     METHODS spec_parameters
       IMPORTING
         !is_meta       TYPE ty_meta_internal
@@ -115,9 +108,7 @@ CLASS zcl_swag DEFINITION
     METHODS text_reply
       IMPORTING
         !is_meta       TYPE ty_meta_internal
-        !it_parameters TYPE abap_parmbind_tab
-      RETURNING
-        VALUE(rv_xstr) TYPE xstring.
+        !it_parameters TYPE abap_parmbind_tab.
     METHODS validate_parameters
       IMPORTING
         !it_parameters TYPE ty_parameters_tt.
@@ -134,8 +125,8 @@ CLASS ZCL_SWAG IMPLEMENTATION.
           lr_dref      TYPE REF TO data.
 
     FIELD-SYMBOLS: <ls_parameter> LIKE LINE OF is_meta-parameters,
-                   <lg_comp>  TYPE any,
-                   <lg_struc> TYPE any.
+                   <lg_comp>      TYPE any,
+                   <lg_struc>     TYPE any.
 
 
     lr_dref = create_data( is_meta ).
@@ -217,22 +208,27 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       ASSIGN COMPONENT <ls_parameter>-sconame OF STRUCTURE <lg_struc> TO <lg_comp>.
       ASSERT sy-subrc = 0.
 
-      lv_cdata = mi_server->request->get_cdata( ).
-      lv_cdata = '{"DATA":' && lv_cdata && '}'.
+      IF <ls_parameter>-type = 'STRING'.
+        <lg_comp> = mi_server->request->get_cdata( ).
+      ELSE.
+        lv_cdata = mi_server->request->get_cdata( ).
+        lv_cdata = '{"DATA":' && lv_cdata && '}'.
 
-      lo_writer = cl_sxml_string_writer=>create( type = if_sxml=>co_xt_json ).
+        lo_writer = cl_sxml_string_writer=>create( type = if_sxml=>co_xt_json ).
 
-      CALL TRANSFORMATION demo_json_xml_to_upper
-        SOURCE XML lv_cdata
-        RESULT XML lo_writer.
+        CALL TRANSFORMATION demo_json_xml_to_upper
+          SOURCE XML lv_cdata
+          RESULT XML lo_writer.
 
-      lv_json = lo_writer->get_output( ).
+        lv_json = lo_writer->get_output( ).
 
-      CALL TRANSFORMATION id
-        SOURCE XML lv_json
-        RESULT data = <lg_comp>.
+        CALL TRANSFORMATION id
+          SOURCE XML lv_json
+          RESULT data = <lg_comp>.
+      ENDIF.
 
 * multiple body input parameters not allowed
+* todo, this should be validated earlier
       RETURN.
 
     ENDLOOP.
@@ -330,11 +326,14 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       _add lv_add.
 
       _add '        "produces":['.
-      IF <ls_meta>-meta-produce IS INITIAL.
-        _add '"application/json"'.
+
+      READ TABLE <ls_meta>-parameters WITH KEY
+        pardecltyp = c_parm_kind-returning
+        type = 'STRING' TRANSPORTING NO FIELDS.
+      IF sy-subrc = 0.
+        _add '"text/plain"'.
       ELSE.
-        lv_add = |"{ <ls_meta>-meta-produce }"|.
-        _add lv_add.
+        _add '"application/json"'.
       ENDIF.
 
       _add '        ],'.
@@ -367,6 +366,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     _add '}'.
 
     mi_server->response->set_cdata( rv_spec ).
+    mi_server->response->set_status( code = 200 reason = '200' ).
 
   ENDMETHOD.
 
@@ -448,13 +448,15 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       IN rv_ui WITH iv_json_url ##NO_TEXT.
 
     mi_server->response->set_cdata( rv_ui ).
+    mi_server->response->set_status( code = 200 reason = '200' ).
 
   ENDMETHOD.
 
 
   METHOD json_reply.
 
-    DATA: lo_writer TYPE REF TO cl_sxml_string_writer.
+    DATA: lv_data   TYPE xstring,
+          lo_writer TYPE REF TO cl_sxml_string_writer.
 
     FIELD-SYMBOLS: <lg_struc> TYPE any.
 
@@ -471,9 +473,11 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       CALL TRANSFORMATION id
         SOURCE data = <lg_struc>
         RESULT XML lo_writer.
-      rv_json = lo_writer->get_output( ).
+      lv_data = lo_writer->get_output( ).
 
     ENDIF.
+
+    mi_server->response->set_data( lv_data ).
 
   ENDMETHOD.
 
@@ -517,12 +521,13 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
   METHOD run.
 
-    DATA: lv_data       TYPE xstring,
+    DATA: lv_path       TYPE string,
+          lv_method     TYPE string,
           lt_parameters TYPE abap_parmbind_tab.
 
 
-    DATA(lv_path) = mi_server->request->get_header_field( '~path' ).
-    DATA(lv_method) = mi_server->request->get_method( ).
+    lv_path = mi_server->request->get_header_field( '~path' ).
+    lv_method = mi_server->request->get_method( ).
 
     LOOP AT mt_meta ASSIGNING FIELD-SYMBOL(<ls_meta>).
       IF lv_method <> <ls_meta>-meta-method.
@@ -536,24 +541,31 @@ CLASS ZCL_SWAG IMPLEMENTATION.
         CALL METHOD <ls_meta>-obj->(<ls_meta>-meta-handler)
           PARAMETER-TABLE lt_parameters.
 
-        CASE <ls_meta>-meta-produce.
-          WHEN zcl_swag=>c_content_type-text_plain.
-            lv_data = text_reply(
-              is_meta       = <ls_meta>
-              it_parameters = lt_parameters ).
-          WHEN OTHERS.
-            lv_data = json_reply(
-              is_meta       = <ls_meta>
-              it_parameters = lt_parameters ).
-        ENDCASE.
-
         mi_server->response->set_compression( ).
-        mi_server->response->set_data( lv_data ).
+
+        LOOP AT <ls_meta>-parameters
+            TRANSPORTING NO FIELDS
+            WHERE pardecltyp = c_parm_kind-returning
+            AND ( type = 'STRING' OR type = 'XSTRING' ).
+          EXIT.
+        ENDLOOP.
+        IF sy-subrc = 0.
+          text_reply( is_meta       = <ls_meta>
+                      it_parameters = lt_parameters ).
+        ELSE.
+          json_reply( is_meta       = <ls_meta>
+                      it_parameters = lt_parameters ).
+        ENDIF.
+
+        mi_server->response->set_status( code = 200 reason = '200' ).
+
+        RETURN.
 
       ENDIF.
     ENDLOOP.
 
-* todo, error if no handler found?
+    mi_server->response->set_cdata( '404 swagger' ).
+    mi_server->response->set_status( code = 404 reason = '404' ).
 
   ENDMETHOD.
 
@@ -643,7 +655,14 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
       ASSIGN <ls_parameter>-value->* TO <lg_any>.
 
-      rv_xstr = <lg_any>.
+      CASE <ls_meta>-type.
+        WHEN 'XSTRING'.
+          mi_server->response->set_data( <lg_any> ).
+        WHEN 'STRING'.
+          mi_server->response->set_cdata( <lg_any> ).
+        WHEN OTHERS.
+          ASSERT 0 = 1.
+      ENDCASE.
     ENDIF.
 
   ENDMETHOD.
