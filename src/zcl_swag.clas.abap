@@ -505,13 +505,15 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     DATA: lv_data   TYPE xstring,
           lo_writer TYPE REF TO cl_sxml_string_writer.
 
-    FIELD-SYMBOLS: <lg_struc> TYPE any.
+    FIELD-SYMBOLS: <ls_meta>      LIKE LINE OF is_meta-parameters,
+                   <ls_parameter> LIKE LINE OF it_parameters,
+                   <lg_struc>     TYPE any.
 
 
-    READ TABLE is_meta-parameters ASSIGNING FIELD-SYMBOL(<ls_meta>)
+    READ TABLE is_meta-parameters ASSIGNING <ls_meta>
       WITH KEY pardecltyp = c_parm_kind-returning.
     IF sy-subrc  = 0.
-      READ TABLE it_parameters ASSIGNING FIELD-SYMBOL(<ls_parameter>)
+      READ TABLE it_parameters ASSIGNING <ls_parameter>
         WITH KEY name = <ls_meta>-sconame.
       ASSERT sy-subrc = 0.
 
@@ -531,13 +533,14 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
   METHOD register.
 
-    DATA: ls_meta LIKE LINE OF mt_meta.
+    DATA: ls_meta LIKE LINE OF mt_meta,
+          lo_obj type ref to cl_abap_objectdescr.
+
 
     LOOP AT ii_handler->meta( ) INTO ls_meta-meta.
       ls_meta-obj = ii_handler.
 
-      DATA(lo_obj) = CAST cl_abap_objectdescr(
-        cl_abap_objectdescr=>describe_by_object_ref( ii_handler ) ).
+      lo_obj ?= cl_abap_objectdescr=>describe_by_object_ref( ii_handler ).
 
       READ TABLE lo_obj->methods
         WITH KEY name = ls_meta-meta-handler
@@ -572,6 +575,8 @@ CLASS ZCL_SWAG IMPLEMENTATION.
           lv_method     TYPE string,
           lt_parameters TYPE abap_parmbind_tab.
 
+    FIELD-SYMBOLS: <ls_meta> LIKE LINE OF mt_meta.
+
 
     lv_path = mi_server->request->get_header_field( '~path' ).
     lv_path = cl_http_utility=>unescape_url( lv_path ).
@@ -589,7 +594,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    LOOP AT mt_meta ASSIGNING FIELD-SYMBOL(<ls_meta>).
+    LOOP AT mt_meta ASSIGNING <ls_meta>.
       IF lv_method <> <ls_meta>-meta-method.
         CONTINUE.
       ENDIF.
@@ -632,12 +637,16 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
   METHOD spec_parameters.
 
-    DATA: lt_string TYPE TABLE OF string.
+    DATA: lt_string TYPE TABLE OF string,
+          lv_type   TYPE string,
+          lo_map    TYPE REF TO lcl_map_type.
+
+    FIELD-SYMBOLS: <ls_parameter> LIKE LINE OF is_meta-parameters.
 
 
     APPEND '"parameters":[' TO lt_string.
 
-    LOOP AT is_meta-parameters ASSIGNING FIELD-SYMBOL(<ls_parameter>)
+    LOOP AT is_meta-parameters ASSIGNING <ls_parameter>
         WHERE pardecltyp = c_parm_kind-importing.
 
       APPEND '{' TO lt_string.
@@ -656,8 +665,8 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
       APPEND '"description":"",' TO lt_string.
 
-      DATA(lo_map) = NEW lcl_map_type( ).
-      DATA(lv_type) = lo_map->map( <ls_parameter> ).
+      CREATE OBJECT lo_map.
+      lv_type = lo_map->map( <ls_parameter> ).
       APPEND |{ lv_type },| TO lt_string.
 *      APPEND |"type":"string",|  TO lt_string.
 *      APPEND |"schema":\{{ lv_type }\},| TO lt_string.
@@ -703,13 +712,15 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
   METHOD text_reply.
 
-    FIELD-SYMBOLS: <lg_any> TYPE any.
+    FIELD-SYMBOLS: <lg_any>       TYPE any,
+                   <ls_meta>      LIKE LINE OF is_meta-parameters,
+                   <ls_parameter> LIKE LINE OF it_parameters.
 
 
-    READ TABLE is_meta-parameters ASSIGNING FIELD-SYMBOL(<ls_meta>)
+    READ TABLE is_meta-parameters ASSIGNING <ls_meta>
       WITH KEY pardecltyp = c_parm_kind-returning.
     IF sy-subrc  = 0.
-      READ TABLE it_parameters ASSIGNING FIELD-SYMBOL(<ls_parameter>)
+      READ TABLE it_parameters ASSIGNING <ls_parameter>
         WITH KEY name = <ls_meta>-sconame.
       ASSERT sy-subrc = 0.
 
