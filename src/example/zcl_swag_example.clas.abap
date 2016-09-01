@@ -22,7 +22,9 @@ CLASS ZCL_SWAG_EXAMPLE IMPLEMENTATION.
 
     CREATE OBJECT lo_swag
       EXPORTING
-        ii_server = server.
+        ii_server = server
+        iv_title  = 'Example'
+        iv_base   = '/'.
 
     CREATE OBJECT lo_handler.
     lo_swag->register( lo_handler ).
