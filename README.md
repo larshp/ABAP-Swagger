@@ -1,3 +1,5 @@
+[![abaplint](http://abaplint.org/badges/larshp/ABAP-Swagger)](http://abaplint.org/project/larshp/ABAP-Swagger)
+
 # ABAP-Swagger
 
 An approach to expose ABAP REST services
