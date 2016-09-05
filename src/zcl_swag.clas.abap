@@ -227,7 +227,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
         lo_writer = cl_sxml_string_writer=>create( type = if_sxml=>co_xt_json ).
 
-        CALL TRANSFORMATION demo_json_xml_to_upper
+        CALL TRANSFORMATION zdemo_json_xml_to_upper
           SOURCE XML lv_cdata
           RESULT XML lo_writer.
 
@@ -534,10 +534,12 @@ CLASS ZCL_SWAG IMPLEMENTATION.
   METHOD register.
 
     DATA: ls_meta LIKE LINE OF mt_meta,
+          lt_meta type ty_meta_tt,
           lo_obj type ref to cl_abap_objectdescr.
 
 
-    LOOP AT ii_handler->meta( ) INTO ls_meta-meta.
+    lt_meta = ii_handler->meta( ).
+    LOOP AT lt_meta INTO ls_meta-meta.
       ls_meta-obj = ii_handler.
 
       lo_obj ?= cl_abap_objectdescr=>describe_by_object_ref( ii_handler ).
@@ -638,6 +640,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
   METHOD spec_parameters.
 
     DATA: lt_string TYPE TABLE OF string,
+          ls_string LIKE LINE OF lt_string,
           lv_type   TYPE string,
           lo_map    TYPE REF TO lcl_map_type.
 
@@ -651,7 +654,9 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
       APPEND '{' TO lt_string.
 
-      APPEND |"name":"{ <ls_parameter>-sconame }",|  TO lt_string.
+      CONCATENATE '"name":"' <ls_parameter>-sconame '",' INTO ls_string.
+      APPEND ls_string TO lt_string.
+*      APPEND |"name":"{ <ls_parameter>-sconame }",|  TO lt_string.
 
       READ TABLE is_meta-meta-url-group_names FROM <ls_parameter>-sconame
         TRANSPORTING NO FIELDS.
@@ -667,7 +672,9 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
       CREATE OBJECT lo_map.
       lv_type = lo_map->map( <ls_parameter> ).
-      APPEND |{ lv_type },| TO lt_string.
+      CONCATENATE lv_type ',' INTO ls_string.
+      APPEND ls_string TO lt_string.
+*      APPEND |{ lv_type },| TO lt_string.
 *      APPEND |"type":"string",|  TO lt_string.
 *      APPEND |"schema":\{{ lv_type }\},| TO lt_string.
 

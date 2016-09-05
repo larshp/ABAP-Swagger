@@ -1,0 +1,12 @@
+<xsl:transform xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:sap="http://www.sap.com/sapxsl" version="1.0">
+  <xsl:template match="@* | node()">
+    <xsl:copy>
+      <xsl:apply-templates select="@* | node()"/>
+    </xsl:copy>
+  </xsl:template>
+  <xsl:template match="@*">
+    <xsl:attribute name="name">
+      <xsl:value-of select="sap:upper-case(.)"/>
+    </xsl:attribute>
+  </xsl:template>
+</xsl:transform>
