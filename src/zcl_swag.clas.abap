@@ -485,7 +485,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     IF iv_dist IS INITIAL.
       REPLACE ALL OCCURRENCES OF 'iv_dist'
-        IN rv_ui WITH 'https://npmcdn.com/swagger-ui@2.1.4/dist' ##NO_TEXT.
+        IN rv_ui WITH 'https://unpkg.com/swagger-ui@2.1.4/dist' ##NO_TEXT.
     ELSE.
       REPLACE ALL OCCURRENCES OF 'iv_dist'
         IN rv_ui WITH iv_dist ##NO_TEXT.
