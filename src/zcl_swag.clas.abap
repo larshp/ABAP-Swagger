@@ -21,9 +21,10 @@ CLASS zcl_swag DEFINITION
 
     CONSTANTS:
       BEGIN OF c_method,
-        get  TYPE string VALUE 'GET',
-        post TYPE string VALUE 'POST',
-        put  TYPE string VALUE 'PUT',
+        get    TYPE string VALUE 'GET',
+        post   TYPE string VALUE 'POST',
+        put    TYPE string VALUE 'PUT',
+        delete TYPE string VALUE 'DELETE',
       END OF c_method.
 
     METHODS constructor
@@ -534,8 +535,8 @@ CLASS ZCL_SWAG IMPLEMENTATION.
   METHOD register.
 
     DATA: ls_meta LIKE LINE OF mt_meta,
-          lt_meta type ty_meta_tt,
-          lo_obj type ref to cl_abap_objectdescr.
+          lt_meta TYPE ty_meta_tt,
+          lo_obj  TYPE REF TO cl_abap_objectdescr.
 
 
     lt_meta = ii_handler->meta( ).
