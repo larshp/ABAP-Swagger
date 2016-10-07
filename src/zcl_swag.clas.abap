@@ -439,25 +439,45 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     ENDIF.
     _add '</title>'.
 
-    _add '<link rel="icon" href="iv_dist/images/favicon-32x32.png" sizes="32x32" />'.
-    _add '<link rel="icon" href="iv_dist/images/favicon-16x16.png" sizes="16x16" />'.
-    _add '<link href="iv_dist/css/typography.css" media="screen" rel="stylesheet" type="text/css"/>'.
-    _add '<link href="iv_dist/css/reset.css" media="screen" rel="stylesheet" type="text/css"/>'.
-    _add '<link href="iv_dist/css/screen.css" media="screen" rel="stylesheet" type="text/css"/>'.
-    _add '<link href="iv_dist/css/reset.css" media="print" rel="stylesheet" type="text/css"/>'.
-    _add '<link href="iv_dist/css/print.css" media="print" rel="stylesheet" type="text/css"/>'.
-    _add '<script src="iv_dist/lib/jquery-1.8.0.min.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/jquery.slideto.min.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/jquery.wiggle.min.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/jquery.ba-bbq.min.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/handlebars-2.0.0.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/underscore-min.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/backbone-min.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/swagger-ui.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/highlight.7.3.pack.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/jsoneditor.min.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/marked.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/swagger-oauth.js" type="text/javascript"></script>'.
+* bad, temprary fix, should use read CDN instead of petstore.swagger.io
+    _add '<link rel="icon" type="image/png" href="http://petstore.swagger.io/images/favicon-32x32.png" sizes="32x32" />'.
+    _add '<link rel="icon" type="image/png" href="http://petstore.swagger.io/images/favicon-16x16.png" sizes="16x16" />'.
+    _add '<link href="http://petstore.swagger.io/css/typography.css" media="screen" rel="stylesheet" type="text/css"/>'.
+    _add '<link href="http://petstore.swagger.io/css/reset.css" media="screen" rel="stylesheet" type="text/css"/>'.
+    _add '<link href="http://petstore.swagger.io/css/screen.css" media="screen" rel="stylesheet" type="text/css"/>'.
+    _add '<link href="http://petstore.swagger.io/css/reset.css" media="print" rel="stylesheet" type="text/css"/>'.
+    _add '<link href="http://petstore.swagger.io/css/print.css" media="print" rel="stylesheet" type="text/css"/>'.
+    _add '<script src="http://petstore.swagger.io/lib/object-assign-pollyfill.js" type="text/javascript"></script>'.
+    _add '<script src="http://petstore.swagger.io/lib/jquery-1.8.0.min.js" type="text/javascript"></script>'.
+    _add '<script src="http://petstore.swagger.io/lib/jquery.slideto.min.js" type="text/javascript"></script>'.
+    _add '<script src="http://petstore.swagger.io/lib/jquery.wiggle.min.js" type="text/javascript"></script>'.
+    _add '<script src="http://petstore.swagger.io/lib/jquery.ba-bbq.min.js" type="text/javascript"></script>'.
+    _add '<script src="http://petstore.swagger.io/lib/handlebars-4.0.5.js" type="text/javascript"></script>'.
+    _add '<script src="http://petstore.swagger.io/lib/lodash.min.js" type="text/javascript"></script>'.
+    _add '<script src="http://petstore.swagger.io/lib/backbone-min.js" type="text/javascript"></script>'.
+    _add '<script src="http://petstore.swagger.io/swagger-ui.js" type="text/javascript"></script>'.
+    _add '<script src="http://petstore.swagger.io/lib/highlight.9.1.0.pack.js" type="text/javascript"></script>'.
+    _add '<script src="http://petstore.swagger.io/lib/highlight.9.1.0.pack_extended.js" type="text/javascript"></script>'.
+    _add '<script src="http://petstore.swagger.io/lib/jsoneditor.min.js" type="text/javascript"></script>'.
+    _add '<script src="http://petstore.swagger.io/lib/marked.js" type="text/javascript"></script>'.
+    _add '<script src="http://petstore.swagger.io/lib/swagger-oauth.js" type="text/javascript"></script>'.
+
+**  <script src='lib/object-assign-pollyfill.js' type='text/javascript'></script>
+*_add '<script src="http://petstore.swagger.io/lib/object-assign-pollyfill.js" type="text/javascript"></script>'.
+*    _add '<script src="iv_dist/jquery/1.8.0/jquery.min.js" type="text/javascript"></script>'.
+**  <script src='lib/jquery.slideto.min.js' type='text/javascript'></script>
+**  <script src='lib/jquery.wiggle.min.js' type='text/javascript'></script>
+**  <script src='lib/jquery.ba-bbq.min.js' type='text/javascript'></script>
+*    _add '<script src="iv_dist/handlebars.js/4.0.5/handlebars.js" type="text/javascript"></script>'.
+*    _add '<script src="iv_dist/lodash.js/3.10.1/lodash.js" type="text/javascript"></script>'.
+*    _add '<script src="iv_dist/backbone.js/1.1.2/backbone.js" type="text/javascript"></script>'.
+*    _add '<script src="iv_dist/swagger-ui/2.2.5/swagger-ui.js" type="text/javascript"></script>'.
+**  <script src='lib/highlight.9.1.0.pack.js' type='text/javascript'></script>
+**  <script src='lib/highlight.9.1.0.pack_extended.js' type='text/javascript'></script>
+*    _add '<script src="iv_dist/json-editor/0.7.22/jsoneditor.js" type="text/javascript"></script>'.
+*    _add '<script src="iv_dist/marked/0.3.6/marked.js" type="text/javascript"></script>'.
+**  <script src='lib/swagger-oauth.js' type='text/javascript'></script>
+
     _add '</head>'.
     _add '<body class="swagger-section">'.
     _add '<div id="header">'.
@@ -486,7 +506,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     IF iv_dist IS INITIAL.
       REPLACE ALL OCCURRENCES OF 'iv_dist'
-        IN rv_ui WITH 'https://unpkg.com/swagger-ui@2.1.4/dist' ##NO_TEXT.
+        IN rv_ui WITH 'https://cdnjs.cloudflare.com/ajax/libs/' ##NO_TEXT.
     ELSE.
       REPLACE ALL OCCURRENCES OF 'iv_dist'
         IN rv_ui WITH iv_dist ##NO_TEXT.
