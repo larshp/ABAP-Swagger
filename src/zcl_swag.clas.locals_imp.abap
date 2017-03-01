@@ -8,23 +8,23 @@ CLASS lcl_map_type DEFINITION FINAL.
     METHODS:
       map
         IMPORTING is_parm        TYPE seosubcodf
-        RETURNING value(rv_type) TYPE string,
+        RETURNING VALUE(rv_type) TYPE string,
       map_internal
         IMPORTING io_typedescr   TYPE REF TO cl_abap_typedescr
-        RETURNING value(rv_type) TYPE string,
+        RETURNING VALUE(rv_type) TYPE string,
       map_structure
         IMPORTING io_typedescr   TYPE REF TO cl_abap_typedescr
-        RETURNING value(rv_type) TYPE string,
+        RETURNING VALUE(rv_type) TYPE string,
       map_table
         IMPORTING io_typedescr   TYPE REF TO cl_abap_typedescr
-        RETURNING value(rv_type) TYPE string,
+        RETURNING VALUE(rv_type) TYPE string,
       map_element
         IMPORTING io_typedescr   TYPE REF TO cl_abap_typedescr
-        RETURNING value(rv_type) TYPE string.
+        RETURNING VALUE(rv_type) TYPE string.
 
     CLASS-METHODS: get_typedescr
       IMPORTING is_parm             TYPE seosubcodf
-      RETURNING value(ro_typedescr) TYPE REF TO cl_abap_typedescr.
+      RETURNING VALUE(ro_typedescr) TYPE REF TO cl_abap_typedescr.
 
 ENDCLASS.                    "lcl_map_type DEFINITION
 
@@ -61,6 +61,7 @@ CLASS lcl_map_type IMPLEMENTATION.
           OR cl_abap_typedescr=>typekind_char
           OR cl_abap_typedescr=>typekind_date
           OR cl_abap_typedescr=>typekind_time
+          OR cl_abap_typedescr=>typekind_num
           OR cl_abap_typedescr=>typekind_hex.
         rv_type = '"type":"string"'.
       WHEN cl_abap_typedescr=>typekind_int1.
@@ -76,7 +77,7 @@ CLASS lcl_map_type IMPLEMENTATION.
   METHOD map_structure.
 
     DATA: lv_index      TYPE i,
-          lv_type       type string,
+          lv_type       TYPE string,
           lt_components TYPE cl_abap_structdescr=>component_table,
           lo_struct     TYPE REF TO cl_abap_structdescr.
 
