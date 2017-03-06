@@ -105,8 +105,15 @@ CLASS lcl_map_type IMPLEMENTATION.
   ENDMETHOD.                    "map_structure
 
   METHOD map_table.
-* todo
-    ASSERT 0 = 1.
+
+    DATA: lv_type  TYPE string,
+          lo_table TYPE REF TO cl_abap_tabledescr.
+
+
+    lo_table ?= io_typedescr.
+    lv_type = map_internal( lo_table->get_table_line_type( ) ).
+    rv_type = '"schema":{"type":"array", "items":{' && lv_type && '}}'.
+
   ENDMETHOD.                    "map_table
 
   METHOD get_typedescr.

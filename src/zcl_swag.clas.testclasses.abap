@@ -110,10 +110,7 @@ ENDCLASS.                    "ltcl_swag IMPLEMENTATION
 *----------------------------------------------------------------------*
 *
 *----------------------------------------------------------------------*
-CLASS ltcl_map_type DEFINITION FOR TESTING
-    DURATION SHORT
-    RISK LEVEL HARMLESS
-    FINAL.
+CLASS ltcl_map_type DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS FINAL.
 
   PUBLIC SECTION.
     INTERFACES:
@@ -126,6 +123,7 @@ CLASS ltcl_map_type DEFINITION FOR TESTING
       setup,
       string FOR TESTING,
       char FOR TESTING,
+      table FOR TESTING,
       structure FOR TESTING.
 
 ENDCLASS.                    "ltcl_map_type DEFINITION
@@ -186,5 +184,20 @@ CLASS ltcl_map_type IMPLEMENTATION.
       exp = '*"type":"object"*' ).
 
   ENDMETHOD.                    "structure
+
+  METHOD table.
+
+    DATA: lv_type TYPE string,
+          ls_parm TYPE seosubcodf.
+
+
+    ls_parm-type = 'STRING_TABLE'.
+    lv_type = mo_map->map( ls_parm ).
+
+    cl_abap_unit_assert=>assert_char_cp(
+      act = lv_type
+      exp = '*"type":"array"*' ).
+
+  ENDMETHOD.
 
 ENDCLASS.                    "ltcl_map_type IMPLEMENTATION
