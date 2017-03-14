@@ -1,6 +1,6 @@
 CLASS zcl_swag DEFINITION
   PUBLIC
-  CREATE PUBLIC.
+  CREATE PUBLIC .
 
   PUBLIC SECTION.
 
@@ -8,16 +8,16 @@ CLASS zcl_swag DEFINITION
       BEGIN OF ty_url,
         regex       TYPE string,
         group_names TYPE STANDARD TABLE OF seosconame WITH DEFAULT KEY,
-      END OF ty_url.
+      END OF ty_url .
     TYPES:
       BEGIN OF ty_meta,
         summary TYPE string,
         url     TYPE ty_url,
         method  TYPE string,
         handler TYPE string,
-      END OF ty_meta.
+      END OF ty_meta .
     TYPES:
-      ty_meta_tt TYPE STANDARD TABLE OF ty_meta WITH DEFAULT KEY.
+      ty_meta_tt TYPE STANDARD TABLE OF ty_meta WITH DEFAULT KEY .
 
     CONSTANTS:
       BEGIN OF c_method,
@@ -25,7 +25,7 @@ CLASS zcl_swag DEFINITION
         post   TYPE string VALUE 'POST',
         put    TYPE string VALUE 'PUT',
         delete TYPE string VALUE 'DELETE',
-      END OF c_method.
+      END OF c_method .
 
     METHODS constructor
       IMPORTING
@@ -33,11 +33,13 @@ CLASS zcl_swag DEFINITION
         !iv_base         TYPE string
         !iv_swagger_json TYPE string DEFAULT '/swagger.json'
         !iv_swagger_html TYPE string DEFAULT '/swagger.html'
-        !iv_title        TYPE string.
+        !iv_title        TYPE string .
     METHODS register
       IMPORTING
-        !ii_handler TYPE REF TO zif_swag_handler.
-    METHODS run.
+        !ii_handler TYPE REF TO zif_swag_handler .
+    METHODS run
+      RAISING
+        cx_static_check .
   PROTECTED SECTION.
   PRIVATE SECTION.
 
