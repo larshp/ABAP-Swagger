@@ -12,7 +12,7 @@ An approach to expose ABAP REST services
 
 3: the methods are now accessible via rest([example](https://github.com/larshp/ABAP-Swagger/blob/master/src/example/zcl_swag_example.clas.abap))
 
-4: the [Swagger UI](http://swagger.io/swagger-ui/) can be accessed via method GENERATE_UI
+4: the [Swagger UI](http://swagger.io/swagger-ui/) can be accessed via `swagger.html` in the base dir of the REST services
 
 ## Installing and Requirements
 
