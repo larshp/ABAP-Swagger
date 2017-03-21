@@ -44,83 +44,86 @@ CLASS zcl_swag DEFINITION
   PRIVATE SECTION.
 
     TYPES:
-      ty_parameters_tt TYPE STANDARD TABLE OF seosubcodf WITH DEFAULT KEY.
+      ty_parameters_tt TYPE STANDARD TABLE OF seosubcodf WITH DEFAULT KEY .
     TYPES:
       BEGIN OF ty_meta_internal,
         meta       TYPE ty_meta,
         obj        TYPE REF TO object,
         parameters TYPE ty_parameters_tt,
         classname  TYPE seoclsname,
-      END OF ty_meta_internal.
+      END OF ty_meta_internal .
     TYPES:
-      ty_meta_internal_tt TYPE STANDARD TABLE OF ty_meta_internal WITH DEFAULT KEY.
+      ty_meta_internal_tt TYPE STANDARD TABLE OF ty_meta_internal WITH DEFAULT KEY .
 
-    DATA mv_base TYPE string.
-    DATA mi_server TYPE REF TO if_http_server.
-    DATA mt_meta TYPE ty_meta_internal_tt.
+    DATA mv_base TYPE string .
+    DATA mi_server TYPE REF TO if_http_server .
+    DATA mt_meta TYPE ty_meta_internal_tt .
     CONSTANTS:
       BEGIN OF c_parm_kind,
         importing TYPE seopardecl VALUE '0',
         exporting TYPE seopardecl VALUE '1',
         changing  TYPE seopardecl VALUE '2',
         returning TYPE seopardecl VALUE '3',
-      END OF c_parm_kind.
-    DATA mv_swagger_json TYPE string.
-    DATA mv_swagger_html TYPE string.
-    DATA mv_title TYPE string.
+      END OF c_parm_kind .
+    DATA mv_swagger_json TYPE string .
+    DATA mv_swagger_html TYPE string .
+    DATA mv_title TYPE string .
 
+    METHODS download
+      IMPORTING
+        !iv_file TYPE string .
     METHODS build_parameters
       IMPORTING
         !is_meta             TYPE ty_meta_internal
       RETURNING
-        VALUE(rt_parameters) TYPE abap_parmbind_tab.
+        VALUE(rt_parameters) TYPE abap_parmbind_tab .
     METHODS create_data
       IMPORTING
         !is_meta       TYPE ty_meta_internal
       RETURNING
-        VALUE(rr_data) TYPE REF TO data.
+        VALUE(rr_data) TYPE REF TO data .
     METHODS from_input
       IMPORTING
         !is_meta TYPE ty_meta_internal
-        !ir_ref  TYPE REF TO data.
+        !ir_ref  TYPE REF TO data .
     METHODS from_path
       IMPORTING
         !is_meta TYPE ty_meta_internal
-        !ir_ref  TYPE REF TO data.
+        !ir_ref  TYPE REF TO data .
     METHODS generate_spec
       IMPORTING
         !iv_title       TYPE clike
         !iv_description TYPE clike
       RETURNING
-        VALUE(rv_spec)  TYPE string.
+        VALUE(rv_spec)  TYPE string .
     METHODS generate_ui
       IMPORTING
         !iv_json_url TYPE string
         !iv_dist     TYPE string DEFAULT ''
         !iv_title    TYPE clike DEFAULT ''
       RETURNING
-        VALUE(rv_ui) TYPE string.
+        VALUE(rv_ui) TYPE string .
     METHODS json_reply
       IMPORTING
         !is_meta       TYPE ty_meta_internal
-        !it_parameters TYPE abap_parmbind_tab.
+        !it_parameters TYPE abap_parmbind_tab .
     METHODS spec_parameters
       IMPORTING
         !is_meta       TYPE ty_meta_internal
       RETURNING
-        VALUE(rv_path) TYPE string.
+        VALUE(rv_path) TYPE string .
     METHODS spec_path
       IMPORTING
         !is_meta       TYPE ty_meta_internal
       RETURNING
-        VALUE(rv_path) TYPE string.
+        VALUE(rv_path) TYPE string .
     METHODS text_reply
       IMPORTING
         !is_meta       TYPE ty_meta_internal
-        !it_parameters TYPE abap_parmbind_tab.
+        !it_parameters TYPE abap_parmbind_tab .
     METHODS validate_parameters
       IMPORTING
-        !it_parameters TYPE ty_parameters_tt.
+        !it_parameters TYPE ty_parameters_tt .
 ENDCLASS.
 
 
@@ -191,6 +194,36 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     lo_struct = cl_abap_structdescr=>get( lt_components ).
 
     CREATE DATA rr_data TYPE HANDLE lo_struct.
+
+  ENDMETHOD.
+
+
+  METHOD download.
+* this is a workaround to avoid CORS problems
+
+* todo, possibility to define url
+* todo, proxy settings
+
+    DATA: li_client TYPE REF TO if_http_client.
+
+    cl_http_client=>create_by_url(
+      EXPORTING
+        url                = 'http://petstore.swagger.io/' && iv_file
+        ssl_id             = 'ANONYM'
+*        proxy_host         = lo_settings->get_proxy_url( )
+*        proxy_service      = lo_settings->get_proxy_port( )
+      IMPORTING
+        client             = li_client ).
+
+    li_client->send(
+      EXCEPTIONS
+        http_communication_failure = 1
+        http_invalid_state         = 2 ).
+
+    li_client->receive( ).
+
+    mi_server->response->set_cdata( li_client->response->get_cdata( ) ).
+    mi_server->response->set_status( code = 200 reason = '200' ).
 
   ENDMETHOD.
 
@@ -422,6 +455,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
 
   METHOD generate_ui.
+* todo, IV_DIST not supplyed from anywhere?
 
     DEFINE _add.
       CONCATENATE rv_ui &1 cl_abap_char_utilities=>newline
@@ -444,48 +478,27 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 * bad, temprary fix, should use read CDN instead of petstore.swagger.io
     _add '<link rel="icon" type="image/png" href="iv_dist/images/favicon-32x32.png" sizes="32x32" />'.
     _add '<link rel="icon" type="image/png" href="iv_dist/images/favicon-16x16.png" sizes="16x16" />'.
-    _add '<link href="iv_dist/css/typography.css" media="screen" rel="stylesheet" type="text/css"/>'.
-    _add '<link href="iv_dist/css/reset.css" media="screen" rel="stylesheet" type="text/css"/>'.
-    _add '<link href="iv_dist/css/screen.css" media="screen" rel="stylesheet" type="text/css"/>'.
-    _add '<link href="iv_dist/css/reset.css" media="print" rel="stylesheet" type="text/css"/>'.
-    _add '<link href="iv_dist/css/print.css" media="print" rel="stylesheet" type="text/css"/>'.
-    _add '<script src="iv_dist/lib/object-assign-pollyfill.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/jquery-1.8.0.min.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/jquery.slideto.min.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/jquery.wiggle.min.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/jquery.ba-bbq.min.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/handlebars-4.0.5.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/lodash.min.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/backbone-min.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/swagger-ui.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/highlight.9.1.0.pack.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/highlight.9.1.0.pack_extended.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/jsoneditor.min.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/marked.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/lib/swagger-oauth.js" type="text/javascript"></script>'.
-
+    _add '<link href="iv_dist/js/swagger-ui.css" media="screen" rel="stylesheet" type="text/css"/>'.
+    _add '<script src="iv_base/js/swagger-ui-bundle.js" type="text/javascript"></script>'.
+    _add '<script src="iv_base/js/swagger-ui-standalone-preset.js" type="text/javascript"></script>'.
     _add '</head>'.
-    _add '<body class="swagger-section">'.
-    _add '<div id="header">'.
-    _add '<div class="swagger-ui-wrap">'.
-    _add '<a id="logo" href="http://swagger.io"><span class="logo__title">swagger</span></a>'.
-    _add '<form id="api_selector">'.
-    _add '<div class="input">'.
-    _add '<input placeholder="http://example.com/api" id="input_baseUrl" name="baseUrl" type="text"/></div>'.
-    _add '<div id="auth_container"></div>'.
-    _add '<div class="input"><a id="explore" class="header__btn" href="#" data-sw-translate>Explore</a></div>'.
-    _add '</form>'.
-    _add '</div>'.
-    _add '</div>'.
-    _add '<div id="message-bar" class="swagger-ui-wrap" data-sw-translate>&nbsp;</div>'.
-    _add '<div id="swagger-ui-container" class="swagger-ui-wrap"></div>'.
+    _add '<body>'.
     _add '<script type="text/javascript">'.
-    _add 'var swaggerUi = new SwaggerUi({'.
-    _add 'url:"swagger.json",'.
-    _add 'validatorUrl:null,'.
-    _add 'dom_id:"swagger-ui-container"'.
-    _add '});'.
-    _add 'swaggerUi.load();'.
+    _add 'window.onload = function() {'.
+    _add 'const ui = SwaggerUIBundle({'.
+    _add 'url: "swagger.json",'.
+    _add 'dom_id: "#swagger-ui",'.
+    _add 'presets: ['.
+    _add 'SwaggerUIBundle.presets.apis,'.
+    _add 'Array.isArray(SwaggerUIStandalonePreset) ? SwaggerUIStandalonePreset : SwaggerUIStandalonePreset.default'.
+    _add '],'.
+    _add 'plugins: ['.
+    _add 'SwaggerUIBundle.plugins.DownloadUrl'.
+    _add '],'.
+    _add 'layout: "StandaloneLayout"'.
+    _add '})'.
+    _add 'window.ui = ui'.
+    _add '}'.
     _add '</script>'.
     _add '</body>'.
     _add '</html>'.
@@ -497,6 +510,9 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       REPLACE ALL OCCURRENCES OF 'iv_dist'
         IN rv_ui WITH iv_dist ##NO_TEXT.
     ENDIF.
+
+    REPLACE ALL OCCURRENCES OF 'iv_base'
+      IN rv_ui WITH mv_base ##NO_TEXT.
 
     REPLACE FIRST OCCURRENCE OF 'swagger.json'
       IN rv_ui WITH iv_json_url ##NO_TEXT.
@@ -601,6 +617,12 @@ CLASS ZCL_SWAG IMPLEMENTATION.
         iv_title       = mv_title
         iv_description = mv_title && ' REST functions' ).
       RETURN.
+    ELSEIF lv_path = mv_base && '/js/swagger-ui-bundle.js'.
+      download( '/js/swagger-ui-bundle.js' ).
+      RETURN.
+    ELSEIF lv_path = mv_base && '/js/swagger-ui-standalone-preset.js'.
+      download( '/js/swagger-ui-standalone-preset.js' ).
+      RETURN.
     ENDIF.
 
     LOOP AT mt_meta ASSIGNING <ls_meta>.
@@ -632,7 +654,6 @@ CLASS ZCL_SWAG IMPLEMENTATION.
         ENDIF.
 
         mi_server->response->set_status( code = 200 reason = '200' ).
-
         RETURN.
 
       ENDIF.
