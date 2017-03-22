@@ -19,7 +19,7 @@ CLASS ltcl_swag DEFINITION FOR TESTING
           mv_reply TYPE string.
 
     METHODS: setup,
-      test FOR TESTING.
+      test FOR TESTING RAISING cx_static_check.
 
     CLASS-METHODS: to_string
       IMPORTING iv_xstr       TYPE xstring
