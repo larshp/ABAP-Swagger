@@ -204,7 +204,9 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 * todo, possibility to define url
 * todo, proxy settings
 
-    DATA: li_client TYPE REF TO if_http_client.
+    DATA: li_client   TYPE REF TO if_http_client,
+          lv_response TYPE string.
+
 
     cl_http_client=>create_by_url(
       EXPORTING
@@ -222,7 +224,14 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     li_client->receive( ).
 
-    mi_server->response->set_cdata( li_client->response->get_cdata( ) ).
+    lv_response = li_client->response->get_cdata( ).
+
+    REPLACE FIRST OCCURRENCE
+      OF '(t=t.requestInterceptor(t)||t),'
+      IN lv_response
+      WITH '(t=t.requestInterceptor(t)||t),t.credentials="same-origin",'.
+
+    mi_server->response->set_cdata( lv_response ).
     mi_server->response->set_status( code = 200 reason = '200' ).
 
   ENDMETHOD.
@@ -483,6 +492,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     _add '<script src="iv_base/js/swagger-ui-standalone-preset.js" type="text/javascript"></script>'.
     _add '</head>'.
     _add '<body>'.
+    _add '<div id="swagger-ui"></div>'.
     _add '<script type="text/javascript">'.
     _add 'window.onload = function() {'.
     _add 'const ui = SwaggerUIBundle({'.
@@ -581,7 +591,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
         WHERE clsname = ls_meta-classname
         AND cmpname = ls_meta-meta-handler
         AND sconame NOT LIKE 'ZCX_%'
-        ORDER BY PRIMARY KEY.
+        ORDER BY PRIMARY KEY.                             "#EC CI_SUBRC
       ASSERT sy-subrc = 0.
 
       validate_parameters( ls_meta-parameters ).
