@@ -40,8 +40,8 @@ CLASS zcl_swag DEFINITION
     METHODS run
       RAISING
         cx_static_check .
+
   PROTECTED SECTION.
-  PRIVATE SECTION.
 
     TYPES:
       ty_parameters_tt TYPE STANDARD TABLE OF seosubcodf WITH DEFAULT KEY .
@@ -55,9 +55,6 @@ CLASS zcl_swag DEFINITION
     TYPES:
       ty_meta_internal_tt TYPE STANDARD TABLE OF ty_meta_internal WITH DEFAULT KEY .
 
-    DATA mv_base TYPE string .
-    DATA mi_server TYPE REF TO if_http_server .
-    DATA mt_meta TYPE ty_meta_internal_tt .
     CONSTANTS:
       BEGIN OF c_parm_kind,
         importing TYPE seopardecl VALUE '0',
@@ -65,13 +62,14 @@ CLASS zcl_swag DEFINITION
         changing  TYPE seopardecl VALUE '2',
         returning TYPE seopardecl VALUE '3',
       END OF c_parm_kind .
+
+    DATA mv_base TYPE string .
+    DATA mi_server TYPE REF TO if_http_server .
+    DATA mt_meta TYPE ty_meta_internal_tt .
     DATA mv_swagger_json TYPE string .
     DATA mv_swagger_html TYPE string .
     DATA mv_title TYPE string .
 
-    METHODS download
-      IMPORTING
-        !iv_file TYPE string .
     METHODS build_parameters
       IMPORTING
         !is_meta             TYPE ty_meta_internal
@@ -82,6 +80,9 @@ CLASS zcl_swag DEFINITION
         !is_meta       TYPE ty_meta_internal
       RETURNING
         VALUE(rr_data) TYPE REF TO data .
+    METHODS download
+      IMPORTING
+        !iv_file TYPE string .
     METHODS from_input
       IMPORTING
         !is_meta TYPE ty_meta_internal
@@ -124,6 +125,7 @@ CLASS zcl_swag DEFINITION
     METHODS validate_parameters
       IMPORTING
         !it_parameters TYPE ty_parameters_tt .
+
 ENDCLASS.
 
 
