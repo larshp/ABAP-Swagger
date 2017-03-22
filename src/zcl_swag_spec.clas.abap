@@ -13,28 +13,32 @@ CLASS zcl_swag_spec DEFINITION
     METHODS generate
       RETURNING
         VALUE(rv_spec) TYPE string .
-  PROTECTED SECTION.
+protected section.
 
-    DATA mv_title TYPE string .
-    DATA mv_description TYPE string .
-    DATA mt_meta TYPE zcl_swag=>ty_meta_internal_tt .
-    DATA mv_base TYPE string .
+  data MV_TITLE type STRING .
+  data MV_DESCRIPTION type STRING .
+  data MT_META type ZCL_SWAG=>TY_META_INTERNAL_TT .
+  data MV_BASE type STRING .
+  data MT_DEFINITIONS type STRING_TABLE .
 
-    METHODS spec_path
-      IMPORTING
-        !is_meta       TYPE zcl_swag=>ty_meta_internal
-      RETURNING
-        VALUE(rv_path) TYPE string .
-    METHODS spec_parameters
-      IMPORTING
-        !is_meta             TYPE zcl_swag=>ty_meta_internal
-      RETURNING
-        VALUE(rv_parameters) TYPE string .
-    METHODS spec_response
-      IMPORTING
-        !is_meta           TYPE zcl_swag=>ty_meta_internal
-      RETURNING
-        VALUE(rv_response) TYPE string .
+  methods DEFINITIONS
+    returning
+      value(RV_DEFS) type STRING .
+  methods PATH
+    importing
+      !IS_META type ZCL_SWAG=>TY_META_INTERNAL
+    returning
+      value(RV_PATH) type STRING .
+  methods PARAMETERS
+    importing
+      !IS_META type ZCL_SWAG=>TY_META_INTERNAL
+    returning
+      value(RV_PARAMETERS) type STRING .
+  methods RESPONSE
+    importing
+      !IS_META type ZCL_SWAG=>TY_META_INTERNAL
+    returning
+      value(RV_RESPONSE) type STRING .
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -49,6 +53,41 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
     mv_description = iv_description.
     mt_meta        = it_meta.
     mv_base        = iv_base.
+
+  ENDMETHOD.
+
+
+  METHOD definitions.
+
+    DATA: lv_string TYPE string,
+          lv_sep    TYPE string,
+          lt_string TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+
+    APPEND '  "definitions":{' TO lt_string.
+
+    lv_sep = |,\n|.
+    CONCATENATE LINES OF mt_definitions INTO lv_string SEPARATED BY lv_sep.
+    APPEND lv_string TO lt_string.
+
+*    _add '    "Response":{'.
+*    _add '      "type":"object",'.
+*    _add '      "properties":{  '.
+*    _add '        "FOO":{'.
+*    _add '          "type":"string"'.
+*    _add '        },'.
+*    _add '        "BAR":{'.
+*    _add '          "type":"string"'.
+*    _add '        }'.
+*    _add '      }'.
+*    _add '    }'.
+
+*    _add '"Response":{"type":"array"}'.
+
+    APPEND '  }' TO lt_string.
+
+    CONCATENATE LINES OF lt_string INTO rv_defs
+      SEPARATED BY cl_abap_char_utilities=>newline.
 
   ENDMETHOD.
 
@@ -78,7 +117,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
 
 * handle path with multiple handlers(ie. GET and POST)
     LOOP AT mt_meta ASSIGNING <ls_meta>.
-      lv_path = spec_path( <ls_meta> ).
+      lv_path = path( <ls_meta> ).
       READ TABLE lt_paths ASSIGNING <ls_path> WITH KEY path = lv_path.
       IF sy-subrc <> 0.
         APPEND INITIAL LINE TO lt_paths ASSIGNING <ls_path>.
@@ -129,7 +168,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
         lv_add = |        "description":"",|.
         _add lv_add.
 
-        lv_add = spec_parameters( <ls_meta> ).
+        lv_add = parameters( <ls_meta> ).
         _add lv_add.
 
         _add '        "produces":['.
@@ -146,7 +185,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
         _add '        ],'.
         _add '        "responses":{'.
 
-        lv_add = spec_response( <ls_meta> ).
+        lv_add = response( <ls_meta> ).
         _add lv_add.
 
         _add '          "500":{'.
@@ -167,25 +206,16 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
     ENDLOOP.
 
     _add '  },'.
-    _add '  "definitions":{'.
-*    _add '    "Response":{'.
-*    _add '      "type":"object",'.
-*    _add '      "properties":{  '.
-*    _add '        "FOO":{'.
-*    _add '          "type":"string"'.
-*    _add '        },'.
-*    _add '        "BAR":{'.
-*    _add '          "type":"string"'.
-*    _add '        }'.
-*    _add '      }'.
-*    _add '    }'.
-    _add '  }'.
+
+    lv_add = definitions( ).
+    _add lv_add.
+
     _add '}'.
 
   ENDMETHOD.
 
 
-  METHOD spec_parameters.
+  METHOD parameters.
 
     DATA: lt_string TYPE TABLE OF string,
           ls_string LIKE LINE OF lt_string,
@@ -217,8 +247,10 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
 
       APPEND '"description":"",' TO lt_string.
 
-      CREATE OBJECT lo_map.
-      lv_type = lo_map->map( <ls_parameter> ).
+      CREATE OBJECT lo_map
+        EXPORTING
+          is_param = <ls_parameter>.
+      lv_type = lo_map->map( ).
       CONCATENATE lv_type ',' INTO ls_string.
       APPEND ls_string TO lt_string.
 
@@ -239,7 +271,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD spec_path.
+  METHOD PATH.
 
     DATA: lv_name    TYPE string,
           lv_offset1 TYPE i,
@@ -261,7 +293,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD spec_response.
+  METHOD response.
 
     DATA: lt_string TYPE TABLE OF string,
           lv_type   TYPE string,
@@ -271,6 +303,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
 
 
     APPEND '"200": {' TO lt_string.
+
     READ TABLE is_meta-parameters WITH KEY pardecltyp = zcl_swag=>c_parm_kind-returning
       TRANSPORTING NO FIELDS.
     IF sy-subrc = 0.
@@ -281,14 +314,17 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
 
     LOOP AT is_meta-parameters ASSIGNING <ls_parameter>
         WHERE pardecltyp = zcl_swag=>c_parm_kind-returning.
-*      CREATE OBJECT lo_map.
-*      lv_type = lo_map->map( <ls_parameter> ).
-*      APPEND lv_type TO lt_string.
+      CREATE OBJECT lo_map
+        EXPORTING
+          is_param  = <ls_parameter>
+          iv_schema = abap_false.
+      lv_type = lo_map->map( ).
 
-* todo, this is wrong
-      APPEND '"schema":{' TO lt_string.
-      APPEND '"type":"array"' TO lt_string.
+      APPEND '"schema": {' TO lt_string.
+      APPEND |"$ref": "#\\/definitions\\/{ is_meta-meta-handler }_Response"| TO lt_string.
       APPEND '}' TO lt_string.
+
+      APPEND |"{ is_meta-meta-handler }_Response":\{{ lv_type }\}| TO mt_definitions.
     ENDLOOP.
 
     APPEND '},' TO lt_string.

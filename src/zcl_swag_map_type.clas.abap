@@ -4,9 +4,26 @@ CLASS zcl_swag_map_type DEFINITION
 
   PUBLIC SECTION.
 
-    METHODS map
+    CLASS-METHODS get_typedescr
       IMPORTING
-        !is_parm       TYPE seosubcodf
+        !is_parm            TYPE seosubcodf
+      RETURNING
+        VALUE(ro_typedescr) TYPE REF TO cl_abap_typedescr .
+    METHODS map
+      RETURNING
+        VALUE(rv_type) TYPE string .
+    METHODS constructor
+      IMPORTING
+        !is_param  TYPE seosubcodf
+        !iv_schema TYPE abap_bool DEFAULT abap_true .
+  PROTECTED SECTION.
+
+    DATA mv_schema TYPE abap_bool .
+    DATA ms_param TYPE seosubcodf .
+
+    METHODS map_element
+      IMPORTING
+        !io_typedescr  TYPE REF TO cl_abap_typedescr
       RETURNING
         VALUE(rv_type) TYPE string .
     METHODS map_internal
@@ -24,21 +41,20 @@ CLASS zcl_swag_map_type DEFINITION
         !io_typedescr  TYPE REF TO cl_abap_typedescr
       RETURNING
         VALUE(rv_type) TYPE string .
-    METHODS map_element
-      IMPORTING
-        !io_typedescr  TYPE REF TO cl_abap_typedescr
-      RETURNING
-        VALUE(rv_type) TYPE string .
-    CLASS-METHODS get_typedescr
-      IMPORTING
-        !is_parm            TYPE seosubcodf
-      RETURNING
-        VALUE(ro_typedescr) TYPE REF TO cl_abap_typedescr .
+  PRIVATE SECTION.
 ENDCLASS.
 
 
 
 CLASS ZCL_SWAG_MAP_TYPE IMPLEMENTATION.
+
+
+  METHOD constructor.
+
+    ms_param  = is_param.
+    mv_schema = iv_schema.
+
+  ENDMETHOD.
 
 
   METHOD get_typedescr.
@@ -68,7 +84,9 @@ CLASS ZCL_SWAG_MAP_TYPE IMPLEMENTATION.
 
 
   METHOD map.
-    rv_type = map_internal( get_typedescr( is_parm ) ).
+
+    rv_type = map_internal( get_typedescr( ms_param ) ).
+
   ENDMETHOD.                    "map
 
 
@@ -86,7 +104,7 @@ CLASS ZCL_SWAG_MAP_TYPE IMPLEMENTATION.
           OR cl_abap_typedescr=>typekind_int.
         rv_type = '"type":"integer"'.
       WHEN cl_abap_typedescr=>typekind_xstring.
-        rv_type = '"type":"binary"'.
+        rv_type = '"type":"string", "format": "binary"'.
       WHEN OTHERS.
         ASSERT 0 = 1.
     ENDCASE.
@@ -130,7 +148,11 @@ CLASS ZCL_SWAG_MAP_TYPE IMPLEMENTATION.
     ENDLOOP.
     DELETE lt_components WHERE as_include = abap_true.
 
-    rv_type = '"schema":{"type":"object", "properties":{'.
+    IF mv_schema = abap_true.
+      rv_type = '"schema":{"type":"object", "properties":{'.
+    ELSE.
+      rv_type = '"type":"object", "properties":{'.
+    ENDIF.
 
     LOOP AT lt_components ASSIGNING <ls_component>.
       lv_index = sy-tabix.
@@ -145,7 +167,11 @@ CLASS ZCL_SWAG_MAP_TYPE IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
 
-    rv_type = rv_type && '}}'.
+    rv_type = rv_type && '}'.
+
+    IF mv_schema = abap_true.
+      rv_type = rv_type && '}'.
+    ENDIF.
 
   ENDMETHOD.                    "map_structure
 
@@ -158,7 +184,12 @@ CLASS ZCL_SWAG_MAP_TYPE IMPLEMENTATION.
 
     lo_table ?= io_typedescr.
     lv_type = map_internal( lo_table->get_table_line_type( ) ).
-    rv_type = '"schema":{"type":"array", "items":{' && lv_type && '}}'.
+
+    IF mv_schema = abap_true.
+      rv_type = '"schema":{"type":"array", "items":{' && lv_type && '}}'.
+    ELSE.
+      rv_type = '"type":"array", "items":{' && lv_type && '}'.
+    ENDIF.
 
   ENDMETHOD.                    "map_table
 ENDCLASS.

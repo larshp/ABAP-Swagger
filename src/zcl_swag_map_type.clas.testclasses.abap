@@ -5,15 +5,10 @@
 *----------------------------------------------------------------------*
 CLASS ltcl_map_type DEFINITION FOR TESTING DURATION SHORT RISK LEVEL HARMLESS FINAL.
 
-  PUBLIC SECTION.
-    INTERFACES:
-      if_http_server.
-
   PRIVATE SECTION.
     DATA: mo_map TYPE REF TO zcl_swag_map_type.
 
     METHODS:
-      setup,
       string FOR TESTING,
       char FOR TESTING,
       table FOR TESTING,
@@ -28,18 +23,19 @@ ENDCLASS.                    "ltcl_map_type DEFINITION
 *----------------------------------------------------------------------*
 CLASS ltcl_map_type IMPLEMENTATION.
 
-  METHOD setup.
-    CREATE OBJECT mo_map.
-  ENDMETHOD.                    "setup
-
   METHOD string.
 
     DATA: lv_type TYPE string,
-          ls_parm TYPE seosubcodf.
+          ls_param TYPE seosubcodf.
 
 
-    ls_parm-type = 'STRING'.
-    lv_type = mo_map->map( ls_parm ).
+    ls_param-type = 'STRING'.
+
+    CREATE OBJECT mo_map
+      EXPORTING
+        is_param = ls_param.
+
+    lv_type = mo_map->map( ).
 
     cl_abap_unit_assert=>assert_equals(
       act = lv_type
@@ -50,12 +46,16 @@ CLASS ltcl_map_type IMPLEMENTATION.
   METHOD char.
 
     DATA: lv_type TYPE string,
-          ls_parm TYPE seosubcodf.
+          ls_param TYPE seosubcodf.
 
 
-    ls_parm-type = 'ZAGS_REPO_NAME'.
+    ls_param-type = 'ZAGS_REPO_NAME'.
 
-    lv_type = mo_map->map( ls_parm ).
+    CREATE OBJECT mo_map
+      EXPORTING
+        is_param = ls_param.
+
+    lv_type = mo_map->map( ).
 
     cl_abap_unit_assert=>assert_equals(
       act = lv_type
@@ -66,11 +66,16 @@ CLASS ltcl_map_type IMPLEMENTATION.
   METHOD structure.
 
     DATA: lv_type TYPE string,
-          ls_parm TYPE seosubcodf.
+          ls_param TYPE seosubcodf.
 
 
-    ls_parm-type = 'USR02'.
-    lv_type = mo_map->map( ls_parm ).
+    ls_param-type = 'USR02'.
+
+    CREATE OBJECT mo_map
+      EXPORTING
+        is_param = ls_param.
+
+    lv_type = mo_map->map( ).
 
     cl_abap_unit_assert=>assert_char_cp(
       act = lv_type
@@ -81,11 +86,16 @@ CLASS ltcl_map_type IMPLEMENTATION.
   METHOD table.
 
     DATA: lv_type TYPE string,
-          ls_parm TYPE seosubcodf.
+          ls_param TYPE seosubcodf.
 
 
-    ls_parm-type = 'STRING_TABLE'.
-    lv_type = mo_map->map( ls_parm ).
+    ls_param-type = 'STRING_TABLE'.
+
+    CREATE OBJECT mo_map
+      EXPORTING
+        is_param = ls_param.
+
+    lv_type = mo_map->map( ).
 
     cl_abap_unit_assert=>assert_char_cp(
       act = lv_type
