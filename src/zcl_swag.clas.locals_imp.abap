@@ -64,7 +64,8 @@ CLASS lcl_map_type IMPLEMENTATION.
           OR cl_abap_typedescr=>typekind_num
           OR cl_abap_typedescr=>typekind_hex.
         rv_type = '"type":"string"'.
-      WHEN cl_abap_typedescr=>typekind_int1.
+      WHEN cl_abap_typedescr=>typekind_int1
+          OR cl_abap_typedescr=>typekind_int.
         rv_type = '"type":"integer"'.
       WHEN cl_abap_typedescr=>typekind_xstring.
         rv_type = '"type":"binary"'.
@@ -87,10 +88,19 @@ CLASS lcl_map_type IMPLEMENTATION.
     lo_struct ?= io_typedescr.
     lt_components = lo_struct->get_components( ).
 
+* todo, this only works with 1 level
+    LOOP AT lt_components ASSIGNING <ls_component> WHERE as_include = abap_true.
+      lo_struct ?= <ls_component>-type.
+      APPEND LINES OF lo_struct->get_components( ) TO lt_components.
+    ENDLOOP.
+    DELETE lt_components WHERE as_include = abap_true.
+
     rv_type = '"schema":{"type":"object", "properties":{'.
 
     LOOP AT lt_components ASSIGNING <ls_component>.
       lv_index = sy-tabix.
+
+      ASSERT NOT <ls_component>-name IS INITIAL.
 
       lv_type = map_internal( <ls_component>-type ).
       rv_type = rv_type && '"' && <ls_component>-name && '":{ ' && lv_type && ' }'.

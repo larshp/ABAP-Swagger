@@ -62,7 +62,6 @@ CLASS zcl_swag DEFINITION
         changing  TYPE seopardecl VALUE '2',
         returning TYPE seopardecl VALUE '3',
       END OF c_parm_kind .
-
     DATA mv_base TYPE string .
     DATA mi_server TYPE REF TO if_http_server .
     DATA mt_meta TYPE ty_meta_internal_tt .
@@ -110,9 +109,14 @@ CLASS zcl_swag DEFINITION
         !it_parameters TYPE abap_parmbind_tab .
     METHODS spec_parameters
       IMPORTING
-        !is_meta       TYPE ty_meta_internal
+        !is_meta             TYPE ty_meta_internal
       RETURNING
-        VALUE(rv_path) TYPE string .
+        VALUE(rv_parameters) TYPE string .
+    METHODS spec_response
+      IMPORTING
+        !is_meta           TYPE ty_meta_internal
+      RETURNING
+        VALUE(rv_response) TYPE string .
     METHODS spec_path
       IMPORTING
         !is_meta       TYPE ty_meta_internal
@@ -125,7 +129,6 @@ CLASS zcl_swag DEFINITION
     METHODS validate_parameters
       IMPORTING
         !it_parameters TYPE ty_parameters_tt .
-
 ENDCLASS.
 
 
@@ -426,6 +429,10 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
         _add '        ],'.
         _add '        "responses":{'.
+
+        lv_add = spec_response( <ls_meta> ).
+        _add lv_add.
+
         _add '          "500":{'.
         _add '            "description":"error"'.
         _add '          }'.
@@ -696,7 +703,6 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
       CONCATENATE '"name":"' <ls_parameter>-sconame '",' INTO ls_string.
       APPEND ls_string TO lt_string.
-*      APPEND |"name":"{ <ls_parameter>-sconame }",|  TO lt_string.
 
       READ TABLE is_meta-meta-url-group_names FROM <ls_parameter>-sconame
         TRANSPORTING NO FIELDS.
@@ -714,9 +720,6 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       lv_type = lo_map->map( <ls_parameter> ).
       CONCATENATE lv_type ',' INTO ls_string.
       APPEND ls_string TO lt_string.
-*      APPEND |{ lv_type },| TO lt_string.
-*      APPEND |"type":"string",|  TO lt_string.
-*      APPEND |"schema":\{{ lv_type }\},| TO lt_string.
 
       APPEND '"required":true'   TO lt_string.
       APPEND '},' TO lt_string.
@@ -729,7 +732,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     APPEND '],' TO lt_string.
 
-    CONCATENATE LINES OF lt_string INTO rv_path
+    CONCATENATE LINES OF lt_string INTO rv_parameters
       SEPARATED BY cl_abap_char_utilities=>newline.
 
   ENDMETHOD.
@@ -753,6 +756,44 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       lv_offset2 = lv_offset2 + 1.
       CONCATENATE rv_path(lv_offset1) '{' lv_name '}' rv_path+lv_offset2 INTO rv_path.
     ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD spec_response.
+
+    DATA: lt_string TYPE TABLE OF string,
+          lv_type   TYPE string,
+          lo_map    TYPE REF TO lcl_map_type.
+
+    FIELD-SYMBOLS: <ls_parameter> LIKE LINE OF is_meta-parameters.
+
+
+    APPEND '"200": {' TO lt_string.
+    READ TABLE is_meta-parameters WITH KEY pardecltyp = c_parm_kind-returning
+      TRANSPORTING NO FIELDS.
+    IF sy-subrc = 0.
+      APPEND '  "description": "successful operation",' TO lt_string.
+    ELSE.
+      APPEND '  "description": "successful operation"' TO lt_string.
+    ENDIF.
+
+    LOOP AT is_meta-parameters ASSIGNING <ls_parameter>
+        WHERE pardecltyp = c_parm_kind-returning.
+*      CREATE OBJECT lo_map.
+*      lv_type = lo_map->map( <ls_parameter> ).
+*      APPEND lv_type TO lt_string.
+
+* todo, this is wrong
+      APPEND '"schema":{' TO lt_string.
+      APPEND '"type":"array"' TO lt_string.
+      APPEND '}' TO lt_string.
+    ENDLOOP.
+
+    APPEND '},' TO lt_string.
+
+    CONCATENATE LINES OF lt_string INTO rv_response
+      SEPARATED BY cl_abap_char_utilities=>newline.
 
   ENDMETHOD.
 
