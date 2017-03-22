@@ -70,20 +70,6 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
     CONCATENATE LINES OF mt_definitions INTO lv_string SEPARATED BY lv_sep.
     APPEND lv_string TO lt_string.
 
-*    _add '    "Response":{'.
-*    _add '      "type":"object",'.
-*    _add '      "properties":{  '.
-*    _add '        "FOO":{'.
-*    _add '          "type":"string"'.
-*    _add '        },'.
-*    _add '        "BAR":{'.
-*    _add '          "type":"string"'.
-*    _add '        }'.
-*    _add '      }'.
-*    _add '    }'.
-
-*    _add '"Response":{"type":"array"}'.
-
     APPEND '  }' TO lt_string.
 
     CONCATENATE LINES OF lt_string INTO rv_defs
@@ -297,6 +283,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
 
     DATA: lt_string TYPE TABLE OF string,
           lv_type   TYPE string,
+          lv_string TYPE string,
           lo_map    TYPE REF TO zcl_swag_map_type.
 
     FIELD-SYMBOLS: <ls_parameter> LIKE LINE OF is_meta-parameters.
@@ -324,7 +311,8 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
       APPEND |"$ref": "#\\/definitions\\/{ is_meta-meta-handler }_Response"| TO lt_string.
       APPEND '}' TO lt_string.
 
-      APPEND |"{ is_meta-meta-handler }_Response":\{{ lv_type }\}| TO mt_definitions.
+      APPEND |"{ is_meta-meta-handler }_Response":\{"type": "object","properties": \{"DATA": \{{ lv_type }\}\}\}|
+        TO mt_definitions.
     ENDLOOP.
 
     APPEND '},' TO lt_string.
