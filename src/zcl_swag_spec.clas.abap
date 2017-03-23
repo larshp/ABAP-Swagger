@@ -13,32 +13,32 @@ CLASS zcl_swag_spec DEFINITION
     METHODS generate
       RETURNING
         VALUE(rv_spec) TYPE string .
-protected section.
+  PROTECTED SECTION.
 
-  data MV_TITLE type STRING .
-  data MV_DESCRIPTION type STRING .
-  data MT_META type ZCL_SWAG=>TY_META_INTERNAL_TT .
-  data MV_BASE type STRING .
-  data MT_DEFINITIONS type STRING_TABLE .
+    DATA mv_title TYPE string .
+    DATA mv_description TYPE string .
+    DATA mt_meta TYPE zcl_swag=>ty_meta_internal_tt .
+    DATA mv_base TYPE string .
+    DATA mt_definitions TYPE string_table .
 
-  methods DEFINITIONS
-    returning
-      value(RV_DEFS) type STRING .
-  methods PATH
-    importing
-      !IS_META type ZCL_SWAG=>TY_META_INTERNAL
-    returning
-      value(RV_PATH) type STRING .
-  methods PARAMETERS
-    importing
-      !IS_META type ZCL_SWAG=>TY_META_INTERNAL
-    returning
-      value(RV_PARAMETERS) type STRING .
-  methods RESPONSE
-    importing
-      !IS_META type ZCL_SWAG=>TY_META_INTERNAL
-    returning
-      value(RV_RESPONSE) type STRING .
+    METHODS definitions
+      RETURNING
+        VALUE(rv_defs) TYPE string .
+    METHODS path
+      IMPORTING
+        !is_meta       TYPE zcl_swag=>ty_meta_internal
+      RETURNING
+        VALUE(rv_path) TYPE string .
+    METHODS parameters
+      IMPORTING
+        !is_meta             TYPE zcl_swag=>ty_meta_internal
+      RETURNING
+        VALUE(rv_parameters) TYPE string .
+    METHODS response
+      IMPORTING
+        !is_meta           TYPE zcl_swag=>ty_meta_internal
+      RETURNING
+        VALUE(rv_response) TYPE string .
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -257,7 +257,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD PATH.
+  METHOD path.
 
     DATA: lv_name    TYPE string,
           lv_offset1 TYPE i,
