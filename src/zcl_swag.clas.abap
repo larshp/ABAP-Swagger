@@ -197,7 +197,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     cl_http_client=>create_by_url(
       EXPORTING
-        url                = 'http://petstore.swagger.io/' && iv_file
+        url                = 'http://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.0.3/' && iv_file
         ssl_id             = 'ANONYM'
 *        proxy_host         = lo_settings->get_proxy_url( )
 *        proxy_service      = lo_settings->get_proxy_port( )
@@ -213,10 +213,15 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     lv_response = li_client->response->get_cdata( ).
 
+*    REPLACE FIRST OCCURRENCE
+*      OF '(t=t.requestInterceptor(t)||t),'
+*      IN lv_response
+*      WITH '(t=t.requestInterceptor(t)||t),t.credentials="same-origin",'.
+
     REPLACE FIRST OCCURRENCE
-      OF '(t=t.requestInterceptor(t)||t),'
+      OF '(t=t.requestInterceptor(t)||t);'
       IN lv_response
-      WITH '(t=t.requestInterceptor(t)||t),t.credentials="same-origin",'.
+      WITH '(t=t.requestInterceptor(t)||t);t.credentials="same-origin";'.
 
     mi_server->response->set_cdata( lv_response ).
     mi_server->response->set_status( code = 200 reason = '200' ).
@@ -362,8 +367,6 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     _add '</title>'.
 
 * bad, temprary fix, should use read CDN instead of petstore.swagger.io
-    _add '<link rel="icon" type="image/png" href="iv_dist/images/favicon-32x32.png" sizes="32x32" />'.
-    _add '<link rel="icon" type="image/png" href="iv_dist/images/favicon-16x16.png" sizes="16x16" />'.
     _add '<link href="iv_dist/js/swagger-ui.css" media="screen" rel="stylesheet" type="text/css"/>'.
     _add '<script src="iv_base/js/swagger-ui-bundle.js" type="text/javascript"></script>'.
     _add '<script src="iv_base/js/swagger-ui-standalone-preset.js" type="text/javascript"></script>'.
@@ -505,10 +508,10 @@ CLASS ZCL_SWAG IMPLEMENTATION.
         iv_description = mv_title && ' REST functions' ).
       RETURN.
     ELSEIF lv_path = mv_base && '/js/swagger-ui-bundle.js'.
-      download( '/js/swagger-ui-bundle.js' ).
+      download( '/swagger-ui-bundle.js' ).
       RETURN.
     ELSEIF lv_path = mv_base && '/js/swagger-ui-standalone-preset.js'.
-      download( '/js/swagger-ui-standalone-preset.js' ).
+      download( '/swagger-ui-standalone-preset.js' ).
       RETURN.
     ENDIF.
 
