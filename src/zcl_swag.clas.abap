@@ -81,7 +81,11 @@ CLASS zcl_swag DEFINITION
     METHODS download
       IMPORTING
         !iv_file TYPE string .
-    METHODS from_input
+    METHODS from_body
+      IMPORTING
+        !is_meta TYPE ty_meta_internal
+        !ir_ref  TYPE REF TO data .
+    METHODS from_query
       IMPORTING
         !is_meta TYPE ty_meta_internal
         !ir_ref  TYPE REF TO data .
@@ -142,8 +146,13 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     from_path( is_meta = is_meta
                ir_ref  = lr_dref ).
 
-    from_input( is_meta = is_meta
-                ir_ref  = lr_dref ).
+    IF is_meta-meta-method = c_method-get.
+      from_query( is_meta = is_meta
+                  ir_ref  = lr_dref ).
+    ELSE.
+      from_body( is_meta = is_meta
+                 ir_ref  = lr_dref ).
+    ENDIF.
 
   ENDMETHOD.
 
@@ -229,7 +238,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD from_input.
+  METHOD from_body.
 
     DATA: lv_cdata  TYPE string,
           lo_writer TYPE REF TO cl_sxml_string_writer,
@@ -320,6 +329,37 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     _store 3.
     _store 4.
     _store 5.
+
+  ENDMETHOD.
+
+
+  METHOD from_query.
+
+    DATA: lv_field  TYPE string.
+
+    FIELD-SYMBOLS: <ls_parameter> LIKE LINE OF is_meta-parameters,
+                   <lg_comp>      TYPE any,
+                   <lg_struc>     TYPE any.
+
+
+    ASSIGN ir_ref->* TO <lg_struc>.
+
+    LOOP AT is_meta-parameters ASSIGNING <ls_parameter>
+        WHERE pardecltyp = c_parm_kind-importing.
+      READ TABLE is_meta-meta-url-group_names FROM <ls_parameter>-sconame
+        TRANSPORTING NO FIELDS.
+      IF sy-subrc = 0.
+* ignore parameters that are part of url
+        CONTINUE.
+      ENDIF.
+
+      ASSIGN COMPONENT <ls_parameter>-sconame OF STRUCTURE <lg_struc> TO <lg_comp>.
+      ASSERT sy-subrc = 0.
+
+      lv_field = to_lower( <ls_parameter>-sconame ).
+      <lg_comp> = mi_server->request->get_form_field( lv_field ).
+
+    ENDLOOP.
 
   ENDMETHOD.
 
