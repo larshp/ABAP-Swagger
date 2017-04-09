@@ -368,16 +368,17 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     _add '<script type="text/javascript">'.
     _add 'window.onload = function() {'.
     _add 'const ui = SwaggerUIBundle({'.
-    _add 'url: "swagger.json",'.
-    _add 'dom_id: "#swagger-ui",'.
-    _add 'presets: ['.
-    _add 'SwaggerUIBundle.presets.apis,'.
-    _add 'Array.isArray(SwaggerUIStandalonePreset) ? SwaggerUIStandalonePreset : SwaggerUIStandalonePreset.default'.
-    _add '],'.
-    _add 'plugins: ['.
-    _add 'SwaggerUIBundle.plugins.DownloadUrl'.
-    _add '],'.
-    _add 'layout: "StandaloneLayout"'.
+    _add '  url: "swagger.json",'.
+    _add '  validatorUrl: "",'.
+    _add '  dom_id: "#swagger-ui",'.
+    _add '  presets: ['.
+    _add '    SwaggerUIBundle.presets.apis,'.
+    _add '    Array.isArray(SwaggerUIStandalonePreset) ? SwaggerUIStandalonePreset : SwaggerUIStandalonePreset.default'.
+    _add '  ],'.
+    _add '  plugins: ['.
+    _add '    SwaggerUIBundle.plugins.DownloadUrl'.
+    _add '  ],'.
+    _add '  layout: "StandaloneLayout"'.
     _add '})'.
     _add 'window.ui = ui'.
     _add '}'.
