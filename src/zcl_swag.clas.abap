@@ -78,9 +78,6 @@ CLASS zcl_swag DEFINITION
         !is_meta       TYPE ty_meta_internal
       RETURNING
         VALUE(rr_data) TYPE REF TO data .
-    METHODS download
-      IMPORTING
-        !iv_file TYPE string .
     METHODS from_body
       IMPORTING
         !is_meta TYPE ty_meta_internal
@@ -190,50 +187,6 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     lo_struct = cl_abap_structdescr=>get( lt_components ).
 
     CREATE DATA rr_data TYPE HANDLE lo_struct.
-
-  ENDMETHOD.
-
-
-  METHOD download.
-* this is a workaround to avoid CORS problems
-
-* todo, possibility to define url
-* todo, proxy settings
-
-    DATA: li_client   TYPE REF TO if_http_client,
-          lv_response TYPE string.
-
-
-    cl_http_client=>create_by_url(
-      EXPORTING
-        url                = 'http://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.0.3/' && iv_file
-        ssl_id             = 'ANONYM'
-*        proxy_host         = lo_settings->get_proxy_url( )
-*        proxy_service      = lo_settings->get_proxy_port( )
-      IMPORTING
-        client             = li_client ).
-
-    li_client->send(
-      EXCEPTIONS
-        http_communication_failure = 1
-        http_invalid_state         = 2 ).
-
-    li_client->receive( ).
-
-    lv_response = li_client->response->get_cdata( ).
-
-*    REPLACE FIRST OCCURRENCE
-*      OF '(t=t.requestInterceptor(t)||t),'
-*      IN lv_response
-*      WITH '(t=t.requestInterceptor(t)||t),t.credentials="same-origin",'.
-
-    REPLACE FIRST OCCURRENCE
-      OF '(t=t.requestInterceptor(t)||t);'
-      IN lv_response
-      WITH '(t=t.requestInterceptor(t)||t);t.credentials="same-origin";'.
-
-    mi_server->response->set_cdata( lv_response ).
-    mi_server->response->set_status( code = 200 reason = '200' ).
 
   ENDMETHOD.
 
@@ -406,10 +359,9 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     ENDIF.
     _add '</title>'.
 
-* bad, temprary fix, should use read CDN instead of petstore.swagger.io
-    _add '<link href="iv_dist/js/swagger-ui.css" media="screen" rel="stylesheet" type="text/css"/>'.
-    _add '<script src="iv_base/js/swagger-ui-bundle.js" type="text/javascript"></script>'.
-    _add '<script src="iv_base/js/swagger-ui-standalone-preset.js" type="text/javascript"></script>'.
+    _add '<link href="iv_dist/swagger-ui.css" media="screen" rel="stylesheet" type="text/css"/>'.
+    _add '<script src="iv_dist/swagger-ui-bundle.js" type="text/javascript"></script>'.
+    _add '<script src="iv_dist/swagger-ui-standalone-preset.js" type="text/javascript"></script>'.
     _add '</head>'.
     _add '<body>'.
     _add '<div id="swagger-ui"></div>'.
@@ -435,14 +387,11 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     IF iv_dist IS INITIAL.
       REPLACE ALL OCCURRENCES OF 'iv_dist'
-        IN rv_ui WITH 'http://petstore.swagger.io' ##NO_TEXT.
+        IN rv_ui WITH 'http://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.0.5/'.
     ELSE.
       REPLACE ALL OCCURRENCES OF 'iv_dist'
         IN rv_ui WITH iv_dist ##NO_TEXT.
     ENDIF.
-
-    REPLACE ALL OCCURRENCES OF 'iv_base'
-      IN rv_ui WITH mv_base ##NO_TEXT.
 
     REPLACE FIRST OCCURRENCE OF 'swagger.json'
       IN rv_ui WITH iv_json_url ##NO_TEXT.
@@ -546,12 +495,6 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       generate_spec(
         iv_title       = mv_title
         iv_description = mv_title && ' REST functions' ).
-      RETURN.
-    ELSEIF lv_path = mv_base && '/js/swagger-ui-bundle.js'.
-      download( '/swagger-ui-bundle.js' ).
-      RETURN.
-    ELSEIF lv_path = mv_base && '/js/swagger-ui-standalone-preset.js'.
-      download( '/swagger-ui-standalone-preset.js' ).
       RETURN.
     ENDIF.
 
