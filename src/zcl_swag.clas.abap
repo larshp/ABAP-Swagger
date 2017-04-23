@@ -527,6 +527,9 @@ CLASS ZCL_SWAG IMPLEMENTATION.
                       it_parameters = lt_parameters ).
         ENDIF.
 
+        mi_server->response->set_header_field( name  = 'cache-control'
+                                               value = 'no-cache' ).
+
         mi_server->response->set_status( code = 200 reason = '200' ).
         RETURN.
 
