@@ -388,7 +388,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     IF iv_dist IS INITIAL.
       REPLACE ALL OCCURRENCES OF 'iv_dist'
-        IN rv_ui WITH 'http://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.0.6/'.
+        IN rv_ui WITH 'http://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.0.18/'.
     ELSE.
       REPLACE ALL OCCURRENCES OF 'iv_dist'
         IN rv_ui WITH iv_dist ##NO_TEXT.
