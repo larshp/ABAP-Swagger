@@ -103,6 +103,8 @@ CLASS ZCL_SWAG_MAP_TYPE IMPLEMENTATION.
       WHEN cl_abap_typedescr=>typekind_int1
           OR cl_abap_typedescr=>typekind_int.
         rv_type = '"type":"integer"'.
+      WHEN cl_abap_typedescr=>typekind_packed.
+        rv_type = '"type":"number"'.
       WHEN cl_abap_typedescr=>typekind_xstring.
         rv_type = '"type":"string", "format": "binary"'.
       WHEN OTHERS.
