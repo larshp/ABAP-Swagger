@@ -25,6 +25,7 @@ CLASS zcl_swag DEFINITION
         url     TYPE ty_url,
         method  TYPE string,
         handler TYPE string,
+        tags    TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
       END OF ty_meta .
     TYPES:
       BEGIN OF ty_meta_internal,

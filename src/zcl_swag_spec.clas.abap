@@ -95,6 +95,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
           lv_last_path TYPE abap_bool,
           lv_last_meta TYPE abap_bool,
           lv_path      TYPE string,
+          lv_tags      TYPE string,
           lv_add       TYPE string.
 
     FIELD-SYMBOLS: <ls_path> LIKE LINE OF lt_paths,
@@ -149,6 +150,13 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
 
         lv_add = |      "{ to_lower( <ls_meta>-meta-method ) }":\{|.
         _add lv_add.
+
+        IF lines( <ls_meta>-meta-tags ) > 0.
+          CONCATENATE LINES OF <ls_meta>-meta-tags INTO lv_tags SEPARATED BY '", "'.
+          lv_add = |        "tags":["{ lv_tags }"],|.
+          _add lv_add.
+        ENDIF.
+
         lv_add = |        "summary":"{ <ls_meta>-meta-summary }",|.
         _add lv_add.
         lv_add = |        "description":"",|.
