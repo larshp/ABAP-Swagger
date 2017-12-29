@@ -463,7 +463,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
         AND cmpname = ls_meta-meta-handler
         AND sconame NOT LIKE 'ZCX_%'
         ORDER BY PRIMARY KEY.                             "#EC CI_SUBRC
-      ASSERT sy-subrc = 0.
+      ASSERT sy-subrc = 0. " the method does not have any parameters
 
       validate_parameters( ls_meta-parameters ).
 
