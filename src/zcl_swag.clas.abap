@@ -500,10 +500,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       RETURN.
     ENDIF.
 
-    LOOP AT mt_meta ASSIGNING <ls_meta>.
-      IF lv_method <> <ls_meta>-meta-method.
-        CONTINUE.
-      ENDIF.
+    LOOP AT mt_meta ASSIGNING <ls_meta> WHERE meta-method = lv_method.
 
       FIND REGEX <ls_meta>-meta-url-regex IN lv_path.
       IF sy-subrc = 0.
@@ -518,12 +515,15 @@ CLASS ZCL_SWAG IMPLEMENTATION.
             TRANSPORTING NO FIELDS
             WHERE pardecltyp = c_parm_kind-returning
             AND ( type = 'STRING' OR type = 'XSTRING' ).
+* assumption: RETURNING only, no EXPORTING at the same time
           EXIT.
         ENDLOOP.
         IF sy-subrc = 0.
           text_reply( is_meta       = <ls_meta>
                       it_parameters = lt_parameters ).
         ELSE.
+          mi_server->response->set_header_field( name  = 'content-type'
+                                                 value = 'application/json' ).
           json_reply( is_meta       = <ls_meta>
                       it_parameters = lt_parameters ).
         ENDIF.
@@ -537,7 +537,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
 
-    mi_server->response->set_cdata( '404 swagger' ).
+    mi_server->response->set_cdata( '404, swagger' ).
     mi_server->response->set_status( code = 404 reason = '404' ).
 
   ENDMETHOD.
