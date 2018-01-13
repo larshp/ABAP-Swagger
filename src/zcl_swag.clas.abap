@@ -361,11 +361,11 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     _add '</title>'.
 
     _add '<link href="iv_dist/swagger-ui.css" media="screen" rel="stylesheet" type="text/css"/>'.
-    _add '<script src="iv_dist/swagger-ui-bundle.js" type="text/javascript"></script>'.
-    _add '<script src="iv_dist/swagger-ui-standalone-preset.js" type="text/javascript"></script>'.
     _add '</head>'.
     _add '<body>'.
     _add '<div id="swagger-ui"></div>'.
+    _add '<script src="iv_dist/swagger-ui-bundle.js" type="text/javascript"></script>'.
+    _add '<script src="iv_dist/swagger-ui-standalone-preset.js" type="text/javascript"></script>'.
     _add '<script type="text/javascript">'.
     _add 'window.onload = function() {'.
     _add 'const ui = SwaggerUIBundle({'.
@@ -389,7 +389,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     IF iv_dist IS INITIAL.
       REPLACE ALL OCCURRENCES OF 'iv_dist'
-        IN rv_ui WITH 'http://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.6.1/'.
+        IN rv_ui WITH 'http://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.9.0/'.
     ELSE.
       REPLACE ALL OCCURRENCES OF 'iv_dist'
         IN rv_ui WITH iv_dist ##NO_TEXT.
