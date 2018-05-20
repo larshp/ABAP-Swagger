@@ -21,12 +21,12 @@ CLASS zcl_swag_map_type DEFINITION
     DATA mv_schema TYPE abap_bool .
     DATA ms_param TYPE seosubcodf .
 
-    METHODS map_element
+  METHODS map_element
       IMPORTING
         !io_typedescr  TYPE REF TO cl_abap_typedescr
       RETURNING
         VALUE(rv_type) TYPE string .
-    METHODS map_internal
+    map_internal
       IMPORTING
         !io_typedescr  TYPE REF TO cl_abap_typedescr
       RETURNING
