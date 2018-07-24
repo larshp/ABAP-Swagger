@@ -44,7 +44,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
+CLASS zcl_swag_spec IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -316,11 +316,12 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
       lv_type = lo_map->map( ).
 
       APPEND '"schema": {' TO lt_string.
-      APPEND |"$ref": "#\\/definitions\\/{ is_meta-meta-handler }_Response"| TO lt_string.
+      lv_string = |"$ref": "#\\/definitions\\/{ is_meta-meta-handler }_Response"|.
+      APPEND lv_string TO lt_string.
       APPEND '}' TO lt_string.
 
-      APPEND |"{ is_meta-meta-handler }_Response":\{"type": "object","properties": \{"DATA": \{{ lv_type }\}\}\}|
-        TO mt_definitions.
+      lv_string = |"{ is_meta-meta-handler }_Response":\{"type": "object","properties": \{"DATA": \{{ lv_type }\}\}\}|.
+      APPEND lv_string TO mt_definitions.
     ENDLOOP.
 
     APPEND '},' TO lt_string.
