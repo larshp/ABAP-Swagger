@@ -44,7 +44,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_swag_spec IMPLEMENTATION.
+CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -248,7 +248,12 @@ CLASS zcl_swag_spec IMPLEMENTATION.
       CONCATENATE lv_type ',' INTO ls_string.
       APPEND ls_string TO lt_string.
 
-      APPEND '"required":true'   TO lt_string.
+      IF <ls_parameter>-paroptionl = abap_true.
+        APPEND '"required":false' TO lt_string.
+      ELSE.
+        APPEND '"required":true' TO lt_string.
+      ENDIF.
+
       APPEND '},' TO lt_string.
     ENDLOOP.
     IF sy-subrc = 0.
