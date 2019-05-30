@@ -49,7 +49,7 @@ CLASS ltcl_map_type IMPLEMENTATION.
           ls_param TYPE seosubcodf.
 
 
-    ls_param-type = 'ZAGS_REPO_NAME'.
+    ls_param-type = 'XUBNAME'.
 
     CREATE OBJECT mo_map
       EXPORTING

@@ -92,26 +92,31 @@ CLASS ZCL_SWAG_MAP_TYPE IMPLEMENTATION.
 
   METHOD map_element.
 
-    CASE io_typedescr->type_kind.
-      WHEN cl_abap_typedescr=>typekind_string
-          OR cl_abap_typedescr=>typekind_char
-          OR cl_abap_typedescr=>typekind_date
-          OR cl_abap_typedescr=>typekind_time
-          OR cl_abap_typedescr=>typekind_num
-          OR cl_abap_typedescr=>typekind_hex.
+    DATA: lo_elemdescr TYPE REF TO cl_abap_elemdescr.
+
+    lo_elemdescr ?= io_typedescr.
+
+    CASE lo_elemdescr->type_kind.
+      WHEN cl_abap_elemdescr=>typekind_string
+          OR cl_abap_elemdescr=>typekind_date
+          OR cl_abap_elemdescr=>typekind_time
+          OR cl_abap_elemdescr=>typekind_num
+          OR cl_abap_elemdescr=>typekind_hex.
         rv_type = '"type":"string"'.
-      WHEN cl_abap_typedescr=>typekind_int1
-          OR cl_abap_typedescr=>typekind_int.
+      WHEN cl_abap_elemdescr=>typekind_char.
+        rv_type = |"type":"string", "maxLength": { lo_elemdescr->output_length }|.
+      WHEN cl_abap_elemdescr=>typekind_int1
+          OR cl_abap_elemdescr=>typekind_int.
         rv_type = '"type":"integer"'.
-      WHEN cl_abap_typedescr=>typekind_packed.
+      WHEN cl_abap_elemdescr=>typekind_packed.
         rv_type = '"type":"number"'.
-      WHEN cl_abap_typedescr=>typekind_xstring.
+      WHEN cl_abap_elemdescr=>typekind_xstring.
         rv_type = '"type":"string", "format": "binary"'.
       WHEN OTHERS.
         ASSERT 0 = 1.
     ENDCASE.
 
-  ENDMETHOD.                    "map_element
+  ENDMETHOD.
 
 
   METHOD map_internal.
