@@ -335,6 +335,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     lv_spec = lo_spec->generate( ).
 
     mi_server->response->set_cdata( lv_spec ).
+    mi_server->response->set_content_type( 'application/json' ).
     mi_server->response->set_status( code = 200 reason = '200' ).
 
   ENDMETHOD.
@@ -362,12 +363,12 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     _add '</title>'.
 
     _add '<link href="iv_dist/swagger-ui.css" media="screen" rel="stylesheet" type="text/css"/>'.
-    _add '  <style>'.
-    _add '    body {'.
-    _add '      margin:0;'.
-    _add '      background: #fafafa;'.
-    _add '    }'.
-    _add '  </style>'.
+    _add '<style>'.
+    _add '  body {'.
+    _add '    margin:0;'.
+    _add '    background: #fafafa;'.
+    _add '  }'.
+    _add '</style>'.
     _add '</head>'.
     _add '<body>'.
     _add '<div id="swagger-ui"></div>'.
