@@ -362,6 +362,12 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     _add '</title>'.
 
     _add '<link href="iv_dist/swagger-ui.css" media="screen" rel="stylesheet" type="text/css"/>'.
+    _add '  <style>'.
+    _add '    body {'.
+    _add '      margin:0;'.
+    _add '      background: #fafafa;'.
+    _add '    }'.
+    _add '  </style>'.
     _add '</head>'.
     _add '<body>'.
     _add '<div id="swagger-ui"></div>'.
@@ -390,7 +396,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     IF iv_dist IS INITIAL.
       REPLACE ALL OCCURRENCES OF 'iv_dist'
-        IN rv_ui WITH 'http://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.22.2/'.
+        IN rv_ui WITH 'http://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.22.2'.
     ELSE.
       REPLACE ALL OCCURRENCES OF 'iv_dist'
         IN rv_ui WITH iv_dist ##NO_TEXT.
