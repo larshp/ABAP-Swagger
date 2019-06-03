@@ -128,6 +128,13 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
     lv_add = |  "basePath":"{ mv_base }",|.
     _add lv_add.
 
+    _add '  "securityDefinitions": {'.
+    _add '    "basicAuth": {"type": "basic"}'.
+    _add '  },'.
+    _add '  "security": ['.
+    _add '    {"basicAuth": []}'.
+    _add '  ],'.
+
     _add '  "schemes":['.
     _add '    "http"'.
     _add '  ],'.
