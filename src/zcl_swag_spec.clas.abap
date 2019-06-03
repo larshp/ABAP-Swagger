@@ -182,6 +182,12 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
         lv_add = response( <ls_meta> ).
         _add lv_add.
 
+        _add '          "401":{'.
+        _add '            "description":"not authorized"'.
+        _add '          },'.
+        _add '          "404":{'.
+        _add '            "description":"not found"'.
+        _add '          },'.
         _add '          "500":{'.
         _add '            "description":"error"'.
         _add '          }'.
