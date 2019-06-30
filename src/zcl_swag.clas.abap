@@ -1,163 +1,163 @@
-class zcl_swag definition
-  public
-  create public .
 
-  public section.
+CLASS zcl_swag DEFINITION
+  PUBLIC
+  CREATE PUBLIC .
 
-    constants:
-      begin of c_parm_kind,
-        importing type seopardecl value '0',
-        exporting type seopardecl value '1',
-        changing  type seopardecl value '2',
-        returning type seopardecl value '3',
-      end of c_parm_kind .
+  PUBLIC SECTION.
 
-    types:
-      ty_parameters_tt type standard table of seosubcodf with default key .
-    types:
-      begin of ty_url,
-        regex       type string,
-        group_names type standard table of seosconame with default key,
-      end of ty_url .
-    types:
-      begin of ty_meta,
-        summary type string,
-        url     type ty_url,
-        method  type string,
-        handler type string,
-        tags    type standard table of string with default key,
-      end of ty_meta .
-    types:
-      begin of ty_meta_internal,
-        meta       type ty_meta,
-        obj        type ref to object,
-        parameters type ty_parameters_tt,
-        classname  type seoclsname,
-      end of ty_meta_internal .
-    types:
-      ty_meta_internal_tt type standard table of ty_meta_internal with default key .
-    types:
-      ty_meta_tt type standard table of ty_meta with default key .
+    CONSTANTS:
+      BEGIN OF c_parm_kind,
+        importing TYPE seopardecl VALUE '0',
+        exporting TYPE seopardecl VALUE '1',
+        changing  TYPE seopardecl VALUE '2',
+        returning TYPE seopardecl VALUE '3',
+      END OF c_parm_kind .
 
-    constants:
-      begin of c_method,
-        get    type string value 'GET',
-        post   type string value 'POST',
-        put    type string value 'PUT',
-        delete type string value 'DELETE',
-      end of c_method .
+    TYPES:
+      ty_parameters_tt TYPE STANDARD TABLE OF seosubcodf WITH DEFAULT KEY .
+    TYPES:
+      BEGIN OF ty_url,
+        regex       TYPE string,
+        group_names TYPE STANDARD TABLE OF seosconame WITH DEFAULT KEY,
+      END OF ty_url .
+    TYPES:
+      BEGIN OF ty_meta,
+        summary TYPE string,
+        url     TYPE ty_url,
+        method  TYPE string,
+        handler TYPE string,
+        tags    TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
+      END OF ty_meta .
+    TYPES:
+      BEGIN OF ty_meta_internal,
+        meta       TYPE ty_meta,
+        obj        TYPE REF TO object,
+        parameters TYPE ty_parameters_tt,
+        classname  TYPE seoclsname,
+      END OF ty_meta_internal .
+    TYPES:
+      ty_meta_internal_tt TYPE STANDARD TABLE OF ty_meta_internal WITH DEFAULT KEY .
+    TYPES:
+      ty_meta_tt TYPE STANDARD TABLE OF ty_meta WITH DEFAULT KEY .
 
-    methods constructor
-      importing
-        !ii_server       type ref to if_http_server
-        !iv_base         type string
-        !iv_swagger_json type string default '/swagger.json'
-        !iv_swagger_html type string default '/swagger.html'
-        !iv_title        type string .
-    methods register
-      importing
-        !ii_handler type ref to zif_swag_handler .
-    methods run
-      raising
+    CONSTANTS:
+      BEGIN OF c_method,
+        get    TYPE string VALUE 'GET',
+        post   TYPE string VALUE 'POST',
+        put    TYPE string VALUE 'PUT',
+        delete TYPE string VALUE 'DELETE',
+      END OF c_method .
+
+    METHODS constructor
+      IMPORTING
+        !ii_server       TYPE REF TO if_http_server
+        !iv_base         TYPE string
+        !iv_swagger_json TYPE string DEFAULT '/swagger.json'
+        !iv_swagger_html TYPE string DEFAULT '/swagger.html'
+        !iv_title        TYPE string .
+    METHODS register
+      IMPORTING
+        !ii_handler TYPE REF TO zif_swag_handler .
+    METHODS run
+      RAISING
         cx_static_check .
-  protected section.
+  PROTECTED SECTION.
 
-    data mv_base type string .
-    data mi_server type ref to if_http_server .
-    data mt_meta type ty_meta_internal_tt .
-    data mv_swagger_json type string .
-    data mv_swagger_html type string .
-    data mv_title type string .
+    DATA mv_base TYPE string .
+    DATA mi_server TYPE REF TO if_http_server .
+    DATA mt_meta TYPE ty_meta_internal_tt .
+    DATA mv_swagger_json TYPE string .
+    DATA mv_swagger_html TYPE string .
+    DATA mv_title TYPE string .
 
-    methods build_parameters
-      importing
-        !is_meta             type ty_meta_internal
-      returning
-        value(rt_parameters) type abap_parmbind_tab .
-    methods create_data
-      importing
-        !is_meta       type ty_meta_internal
-      returning
-        value(rr_data) type ref to data .
-    methods from_body
-      importing
-        !is_meta type ty_meta_internal
-        !ir_ref  type ref to data .
-    methods from_query
-      importing
-        !is_meta type ty_meta_internal
-        !ir_ref  type ref to data .
-    methods from_path
-      importing
-        !is_meta type ty_meta_internal
-        !ir_ref  type ref to data .
-    methods generate_spec
-      importing
-        !iv_title       type clike
-        !iv_description type clike .
-    methods generate_ui
-      importing
-        !iv_json_url type string
-        !iv_dist     type string default ''
-        !iv_title    type clike default ''
-      returning
-        value(rv_ui) type string .
-    methods json_reply
-      importing
-        !is_meta       type ty_meta_internal
-        !it_parameters type abap_parmbind_tab .
-    methods text_reply
-      importing
-        !is_meta       type ty_meta_internal
-        !it_parameters type abap_parmbind_tab .
-    methods validate_parameters
-      importing
-        !it_parameters type ty_parameters_tt .
-  private section.
-    methods set_response_type_json.
-endclass.
-
+    METHODS build_parameters
+      IMPORTING
+        !is_meta             TYPE ty_meta_internal
+      RETURNING
+        VALUE(rt_parameters) TYPE abap_parmbind_tab .
+    METHODS create_data
+      IMPORTING
+        !is_meta       TYPE ty_meta_internal
+      RETURNING
+        VALUE(rr_data) TYPE REF TO data .
+    METHODS from_body
+      IMPORTING
+        !is_meta TYPE ty_meta_internal
+        !ir_ref  TYPE REF TO data .
+    METHODS from_query
+      IMPORTING
+        !is_meta TYPE ty_meta_internal
+        !ir_ref  TYPE REF TO data .
+    METHODS from_path
+      IMPORTING
+        !is_meta TYPE ty_meta_internal
+        !ir_ref  TYPE REF TO data .
+    METHODS generate_spec
+      IMPORTING
+        !iv_title       TYPE clike
+        !iv_description TYPE clike .
+    METHODS generate_ui
+      IMPORTING
+        !iv_json_url TYPE string
+        !iv_dist     TYPE string DEFAULT ''
+        !iv_title    TYPE clike DEFAULT ''
+      RETURNING
+        VALUE(rv_ui) TYPE string .
+    METHODS json_reply
+      IMPORTING
+        !is_meta       TYPE ty_meta_internal
+        !it_parameters TYPE abap_parmbind_tab .
+    METHODS text_reply
+      IMPORTING
+        !is_meta       TYPE ty_meta_internal
+        !it_parameters TYPE abap_parmbind_tab .
+    METHODS validate_parameters
+      IMPORTING
+        !it_parameters TYPE ty_parameters_tt .
+  PRIVATE SECTION.
+ENDCLASS.
 
 
-class zcl_swag implementation.
+
+CLASS ZCL_SWAG IMPLEMENTATION.
 
 
-  method build_parameters.
+  METHOD build_parameters.
 
-    data: ls_parameter like line of rt_parameters,
-          lr_dref      type ref to data.
+    DATA: ls_parameter LIKE LINE OF rt_parameters,
+          lr_dref      TYPE REF TO data.
 
-    field-symbols: <ls_parameter> like line of is_meta-parameters,
-                   <lg_comp>      type any,
-                   <lg_struc>     type any.
+    FIELD-SYMBOLS: <ls_parameter> LIKE LINE OF is_meta-parameters,
+                   <lg_comp>      TYPE any,
+                   <lg_struc>     TYPE any.
 
 
     lr_dref = create_data( is_meta ).
-    assign lr_dref->* to <lg_struc>.
+    ASSIGN lr_dref->* TO <lg_struc>.
 
-    loop at is_meta-parameters assigning <ls_parameter>.
-      assign component <ls_parameter>-sconame of structure <lg_struc> to <lg_comp>.
-      assert sy-subrc = 0.
+    LOOP AT is_meta-parameters ASSIGNING <ls_parameter>.
+      ASSIGN COMPONENT <ls_parameter>-sconame OF STRUCTURE <lg_struc> TO <lg_comp>.
+      ASSERT sy-subrc = 0.
       ls_parameter-name  = <ls_parameter>-sconame.
-      get reference of <lg_comp> into ls_parameter-value.
-      insert ls_parameter into table rt_parameters.
-    endloop.
+      GET REFERENCE OF <lg_comp> INTO ls_parameter-value.
+      INSERT ls_parameter INTO TABLE rt_parameters.
+    ENDLOOP.
 
     from_path( is_meta = is_meta
                ir_ref  = lr_dref ).
 
-    if is_meta-meta-method = c_method-get.
+    IF is_meta-meta-method = c_method-get.
       from_query( is_meta = is_meta
                   ir_ref  = lr_dref ).
-    else.
+    ELSE.
       from_body( is_meta = is_meta
                  ir_ref  = lr_dref ).
-    endif.
+    ENDIF.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method constructor.
+  METHOD constructor.
 
     mi_server       = ii_server.
     mv_base         = iv_base.
@@ -165,116 +165,116 @@ class zcl_swag implementation.
     mv_swagger_html = iv_swagger_html.
     mv_title        = iv_title.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method create_data.
+  METHOD create_data.
 
-    data: lo_struct     type ref to cl_abap_structdescr,
-          lt_components type cl_abap_structdescr=>component_table,
-          lo_typedescr  type ref to cl_abap_typedescr.
+    DATA: lo_struct     TYPE REF TO cl_abap_structdescr,
+          lt_components TYPE cl_abap_structdescr=>component_table,
+          lo_typedescr  TYPE REF TO cl_abap_typedescr.
 
-    field-symbols: <ls_component> like line of lt_components,
-                   <ls_parameter> like line of is_meta-parameters.
+    FIELD-SYMBOLS: <ls_component> LIKE LINE OF lt_components,
+                   <ls_parameter> LIKE LINE OF is_meta-parameters.
 
 
-    loop at is_meta-parameters assigning <ls_parameter>.
-      append initial line to lt_components assigning <ls_component>.
+    LOOP AT is_meta-parameters ASSIGNING <ls_parameter>.
+      APPEND INITIAL LINE TO lt_components ASSIGNING <ls_component>.
       <ls_component>-name = <ls_parameter>-sconame.
 
       lo_typedescr = zcl_swag_map_type=>get_typedescr( <ls_parameter> ).
 
       <ls_component>-type ?= lo_typedescr.
-    endloop.
+    ENDLOOP.
 
     lo_struct = cl_abap_structdescr=>get( lt_components ).
 
-    create data rr_data type handle lo_struct.
+    CREATE DATA rr_data TYPE HANDLE lo_struct.
 
-  endmethod.
-
-
-  method from_body.
-
-    data: json_body  type string,
-          lo_writer type ref to cl_sxml_string_writer,
-          lv_json   type xstring.
-
-    field-symbols: <ls_parameter> like line of is_meta-parameters,
-                   <lg_handler_parameter_in>      type any,
-                   <lg_struc>     type any.
+  ENDMETHOD.
 
 
-    assign ir_ref->* to <lg_struc>.
+  METHOD from_body.
 
-    loop at is_meta-parameters assigning <ls_parameter>
-        where pardecltyp = c_parm_kind-importing.
-      read table is_meta-meta-url-group_names from <ls_parameter>-sconame
-        transporting no fields.
-      if sy-subrc = 0.
+    DATA: lv_json_body  TYPE string,
+          lo_writer TYPE REF TO cl_sxml_string_writer,
+          lv_json   TYPE xstring.
+
+    FIELD-SYMBOLS: <ls_parameter> LIKE LINE OF is_meta-parameters,
+                   <lg_handler_parameter_in>   TYPE any,
+                   <lg_struc>     TYPE any.
+
+
+    ASSIGN ir_ref->* TO <lg_struc>.
+
+    LOOP AT is_meta-parameters ASSIGNING <ls_parameter>
+        WHERE pardecltyp = c_parm_kind-importing.
+      READ TABLE is_meta-meta-url-group_names FROM <ls_parameter>-sconame
+        TRANSPORTING NO FIELDS.
+      IF sy-subrc = 0.
 * ignore parameters that are part of url
-        continue.
-      endif.
+        CONTINUE.
+      ENDIF.
 
-      assign component <ls_parameter>-sconame of structure <lg_struc> to <lg_handler_parameter_in>.
-      assert sy-subrc = 0.
+      ASSIGN COMPONENT <ls_parameter>-sconame OF STRUCTURE <lg_struc> TO <lg_handler_parameter_in>.
+      ASSERT sy-subrc = 0.
 
-      if <ls_parameter>-type = 'STRING'.
+      IF <ls_parameter>-type = 'STRING'.
         <lg_handler_parameter_in> = mi_server->request->get_cdata( ).
-      elseif <ls_parameter>-type = 'XSTRING'.
+      ELSEIF <ls_parameter>-type = 'XSTRING'.
         <lg_handler_parameter_in> = mi_server->request->get_data( ).
-      else.
-        json_body = mi_server->request->get_cdata( ).
+      ELSE.
+        lv_json_body = mi_server->request->get_cdata( ).
 
         /ui2/cl_json=>deserialize(
           exporting
-            json             = json_body
+            json             = lv_json_body
             pretty_name      = /ui2/cl_json=>pretty_mode-camel_case
           changing
             data             = <lg_handler_parameter_in>
         ).
 
-      endif.
+      ENDIF.
 
 * multiple body input parameters not allowed
 * todo, this should be validated earlier
-      return.
+      RETURN.
 
-    endloop.
+    ENDLOOP.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method from_path.
+  METHOD from_path.
 
-    define _store.
+    DEFINE _store.
       READ TABLE is_meta-meta-url-group_names INDEX &1 INTO lv_component.
       IF sy-subrc = 0.
         ASSIGN COMPONENT lv_component OF STRUCTURE <lg_struc> TO <lg_comp>.
         ASSERT sy-subrc = 0.
         <lg_comp> = lv_match&1.
       ENDIF.
-    end-of-definition.
+    END-OF-DEFINITION.
 
-    data: lv_path      type string,
-          lv_component type string,
-          lv_match1    type string,
-          lv_match2    type string,
-          lv_match3    type string,
-          lv_match4    type string,
-          lv_match5    type string.
+    DATA: lv_path      TYPE string,
+          lv_component TYPE string,
+          lv_match1    TYPE string,
+          lv_match2    TYPE string,
+          lv_match3    TYPE string,
+          lv_match4    TYPE string,
+          lv_match5    TYPE string.
 
-    field-symbols: <lg_comp>  type any,
-                   <lg_struc> type any.
+    FIELD-SYMBOLS: <lg_comp>  TYPE any,
+                   <lg_struc> TYPE any.
 
 
-    assign ir_ref->* to <lg_struc>.
+    ASSIGN ir_ref->* TO <lg_struc>.
 
     lv_path = mi_server->request->get_header_field( '~path' ).
     lv_path = cl_http_utility=>unescape_url( lv_path ).
 
-    find regex is_meta-meta-url-regex in lv_path
-      submatches lv_match1 lv_match2 lv_match3 lv_match4 lv_match5.
+    FIND REGEX is_meta-meta-url-regex IN lv_path
+      SUBMATCHES lv_match1 lv_match2 lv_match3 lv_match4 lv_match5.
 
     _store 1.
     _store 2.
@@ -282,31 +282,31 @@ class zcl_swag implementation.
     _store 4.
     _store 5.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method from_query.
+  METHOD from_query.
 
-    data: lv_field  type string.
+    DATA: lv_field  TYPE string.
 
-    field-symbols: <ls_parameter> like line of is_meta-parameters,
-                   <lg_comp>      type any,
-                   <lg_struc>     type any.
+    FIELD-SYMBOLS: <ls_parameter> LIKE LINE OF is_meta-parameters,
+                   <lg_comp>      TYPE any,
+                   <lg_struc>     TYPE any.
 
 
-    assign ir_ref->* to <lg_struc>.
+    ASSIGN ir_ref->* TO <lg_struc>.
 
-    loop at is_meta-parameters assigning <ls_parameter>
-        where pardecltyp = c_parm_kind-importing.
-      read table is_meta-meta-url-group_names from <ls_parameter>-sconame
-        transporting no fields.
-      if sy-subrc = 0.
+    LOOP AT is_meta-parameters ASSIGNING <ls_parameter>
+        WHERE pardecltyp = c_parm_kind-importing.
+      READ TABLE is_meta-meta-url-group_names FROM <ls_parameter>-sconame
+        TRANSPORTING NO FIELDS.
+      IF sy-subrc = 0.
 * ignore parameters that are part of url
-        continue.
-      endif.
+        CONTINUE.
+      ENDIF.
 
-      assign component <ls_parameter>-sconame of structure <lg_struc> to <lg_comp>.
-      assert sy-subrc = 0.
+      ASSIGN COMPONENT <ls_parameter>-sconame OF STRUCTURE <lg_struc> TO <lg_comp>.
+      ASSERT sy-subrc = 0.
 
       lv_field = to_lower( <ls_parameter>-sconame ).
 
@@ -315,19 +315,19 @@ class zcl_swag implementation.
 
       lo_data = mi_server->request->get_form_field( lv_field ).
 
-    endloop.
+    ENDLOOP.
 
-  endmethod.
-
-
-  method generate_spec.
-
-    data: lv_spec type string,
-          lo_spec type ref to zcl_swag_spec.
+  ENDMETHOD.
 
 
-    create object lo_spec
-      exporting
+  METHOD generate_spec.
+
+    DATA: lv_spec TYPE string,
+          lo_spec TYPE REF TO zcl_swag_spec.
+
+
+    CREATE OBJECT lo_spec
+      EXPORTING
         iv_title       = iv_title
         iv_description = iv_description
         it_meta        = mt_meta
@@ -336,19 +336,19 @@ class zcl_swag implementation.
     lv_spec = lo_spec->generate( ).
 
     mi_server->response->set_cdata( lv_spec ).
-    set_response_type_json( ).
+    mi_server->response->set_content_type( 'application/json' ).
     mi_server->response->set_status( code = 200 reason = '200' ).
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method generate_ui.
+  METHOD generate_ui.
 * todo, IV_DIST not supplyed from anywhere?
 
-    define _add.
+    DEFINE _add.
       CONCATENATE rv_ui &1 cl_abap_char_utilities=>newline
         INTO rv_ui ##NO_TEXT.
-    end-of-definition.
+    END-OF-DEFINITION.
 
     _add '<!DOCTYPE html>'.
     _add '<html>'.
@@ -356,11 +356,11 @@ class zcl_swag implementation.
     _add '<meta charset="UTF-8">'.
 
     _add '<title>'.
-    if iv_title is initial.
+    IF iv_title IS INITIAL.
       _add 'Swagger UI'.
-    else.
+    ELSE.
       _add iv_title.
-    endif.
+    ENDIF.
     _add '</title>'.
 
     _add '<link href="iv_dist/swagger-ui.css" media="screen" rel="stylesheet" type="text/css"/>'.
@@ -396,214 +396,204 @@ class zcl_swag implementation.
     _add '</body>'.
     _add '</html>'.
 
-    if iv_dist is initial.
-      replace all occurrences of 'iv_dist'
-        in rv_ui with 'http://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.22.2'.
-    else.
-      replace all occurrences of 'iv_dist'
-        in rv_ui with iv_dist ##NO_TEXT.
-    endif.
+    IF iv_dist IS INITIAL.
+      REPLACE ALL OCCURRENCES OF 'iv_dist'
+        IN rv_ui WITH 'http://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.22.2'.
+    ELSE.
+      REPLACE ALL OCCURRENCES OF 'iv_dist'
+        IN rv_ui WITH iv_dist ##NO_TEXT.
+    ENDIF.
 
-    replace first occurrence of 'swagger.json'
-      in rv_ui with iv_json_url ##NO_TEXT.
+    REPLACE FIRST OCCURRENCE OF 'swagger.json'
+      IN rv_ui WITH iv_json_url ##NO_TEXT.
 
     mi_server->response->set_cdata( rv_ui ).
     mi_server->response->set_status( code = 200 reason = '200' ).
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method json_reply.
+  METHOD json_reply.
 
-    data: lv_data   type xstring,
-          lo_writer type ref to cl_sxml_string_writer.
+    DATA: lv_response_as_json   TYPE string,
+          lo_writer TYPE REF TO cl_sxml_string_writer.
 
-    field-symbols: <ls_meta>      like line of is_meta-parameters,
-                   <ls_parameter> like line of it_parameters,
-                   <lg_handler_parameter_out>     type any.
+    FIELD-SYMBOLS: <ls_meta>      LIKE LINE OF is_meta-parameters,
+                   <ls_parameter> LIKE LINE OF it_parameters,
+                   <lg_handler_parameter_out> TYPE any.
 
 
-    read table is_meta-parameters assigning <ls_meta>
-      with key pardecltyp = c_parm_kind-returning.
-    if sy-subrc  = 0.
-      read table it_parameters assigning <ls_parameter>
-        with key name = <ls_meta>-sconame.
-      assert sy-subrc = 0.
+    READ TABLE is_meta-parameters ASSIGNING <ls_meta>
+      WITH KEY pardecltyp = c_parm_kind-returning.
+    IF sy-subrc  = 0.
+      READ TABLE it_parameters ASSIGNING <ls_parameter>
+        WITH KEY name = <ls_meta>-sconame.
+      ASSERT sy-subrc = 0.
 
-      assign <ls_parameter>-value->* to <lg_handler_parameter_out>.
-
-      data(lv_response_as_json) = /ui2/cl_json=>serialize(
-        exporting
+      ASSIGN <ls_parameter>-value->* TO <lg_handler_parameter_out>.
+      lv_response_as_json = /ui2/cl_json=>serialize(
+        EXPORTInG
           data             = <lg_handler_parameter_out>
           pretty_name      = /ui2/cl_json=>pretty_mode-camel_case
       ).
 
-
-    endif.
+    ENDIF.
 
     mi_server->response->set_cdata( lv_response_as_json ).
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method register.
+  METHOD register.
 
-    data: ls_meta like line of mt_meta,
-          lt_meta type ty_meta_tt,
-          lo_obj  type ref to cl_abap_objectdescr.
+    DATA: ls_meta LIKE LINE OF mt_meta,
+          lt_meta TYPE ty_meta_tt,
+          lo_obj  TYPE REF TO cl_abap_objectdescr.
 
 
     lt_meta = ii_handler->meta( ).
-    loop at lt_meta into ls_meta-meta.
+    LOOP AT lt_meta INTO ls_meta-meta.
       ls_meta-obj = ii_handler.
 
       lo_obj ?= cl_abap_objectdescr=>describe_by_object_ref( ii_handler ).
 
-      read table lo_obj->methods
-        with key name = ls_meta-meta-handler
+      READ TABLE lo_obj->methods
+        WITH KEY name = ls_meta-meta-handler
         visibility = cl_abap_objectdescr=>public
-        transporting no fields.
+        TRANSPORTING NO FIELDS.
 * method must exist and be public
-      assert sy-subrc = 0.
+      ASSERT sy-subrc = 0.
 
       ls_meta-classname = lo_obj->absolute_name+7.
 
-      select * from seosubcodf
-        into table ls_meta-parameters
-        where clsname = ls_meta-classname
-        and cmpname = ls_meta-meta-handler
-        and sconame not like 'ZCX_%'
-        order by primary key.                             "#EC CI_SUBRC
-      assert sy-subrc = 0. " the method does not have any parameters
+      SELECT * FROM seosubcodf
+        INTO TABLE ls_meta-parameters
+        WHERE clsname = ls_meta-classname
+        AND cmpname = ls_meta-meta-handler
+        AND sconame NOT LIKE 'ZCX_%'
+        ORDER BY PRIMARY KEY.                             "#EC CI_SUBRC
+      ASSERT sy-subrc = 0. " the method does not have any parameters
 
       validate_parameters( ls_meta-parameters ).
 
-      append ls_meta to mt_meta.
+      APPEND ls_meta TO mt_meta.
 
-      clear ls_meta.
-    endloop.
+      CLEAR ls_meta.
+    ENDLOOP.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method run.
+  METHOD run.
 
-    data: lv_path       type string,
-          lv_method     type string,
-          lt_parameters type abap_parmbind_tab.
+    DATA: lv_path       TYPE string,
+          lv_method     TYPE string,
+          lt_parameters TYPE abap_parmbind_tab.
 
-    field-symbols: <ls_meta> like line of mt_meta.
+    FIELD-SYMBOLS: <ls_meta> LIKE LINE OF mt_meta.
 
 
     lv_path = mi_server->request->get_header_field( '~path' ).
     lv_path = cl_http_utility=>unescape_url( lv_path ).
     lv_method = mi_server->request->get_method( ).
 
-    if lv_path = mv_base && mv_swagger_html.
+    IF lv_path = mv_base && mv_swagger_html.
       generate_ui(
         iv_json_url = mv_base && mv_swagger_json
         iv_title    = mv_title && ' - Swagger' ).
-      return.
-    elseif lv_path = mv_base && mv_swagger_json.
+      RETURN.
+    ELSEIF lv_path = mv_base && mv_swagger_json.
       generate_spec(
         iv_title       = mv_title
         iv_description = mv_title && ' REST functions' ).
-      return.
-    endif.
+      RETURN.
+    ENDIF.
 
-    loop at mt_meta assigning <ls_meta> where meta-method = lv_method.
+    LOOP AT mt_meta ASSIGNING <ls_meta> WHERE meta-method = lv_method.
 
-      find regex <ls_meta>-meta-url-regex in lv_path.
-      if sy-subrc = 0.
+      FIND REGEX <ls_meta>-meta-url-regex IN lv_path.
+      IF sy-subrc = 0.
 
         lt_parameters = build_parameters( <ls_meta> ).
-        call method <ls_meta>-obj->(<ls_meta>-meta-handler)
-          parameter-table lt_parameters.
+        CALL METHOD <ls_meta>-obj->(<ls_meta>-meta-handler)
+          PARAMETER-TABLE lt_parameters.
 
         mi_server->response->set_compression( ).
 
-        loop at <ls_meta>-parameters
-            transporting no fields
-            where pardecltyp = c_parm_kind-returning
-            and ( type = 'STRING' or type = 'XSTRING' ).
+        LOOP AT <ls_meta>-parameters
+            TRANSPORTING NO FIELDS
+            WHERE pardecltyp = c_parm_kind-returning
+            AND ( type = 'STRING' OR type = 'XSTRING' ).
 * assumption: RETURNING only, no EXPORTING at the same time
-          exit.
-        endloop.
-        if sy-subrc = 0.
+          EXIT.
+        ENDLOOP.
+        IF sy-subrc = 0.
           text_reply( is_meta       = <ls_meta>
                       it_parameters = lt_parameters ).
-        else.
-          set_response_type_json( ).
+        ELSE.
+          mi_server->response->set_header_field( name  = 'content-type'
+                                                 value = 'application/json' ).
           json_reply( is_meta       = <ls_meta>
                       it_parameters = lt_parameters ).
-        endif.
+        ENDIF.
 
         mi_server->response->set_header_field( name  = 'cache-control'
                                                value = 'no-cache' ).
 
         mi_server->response->set_status( code = 200 reason = '200' ).
-        return.
+        RETURN.
 
-      endif.
-    endloop.
+      ENDIF.
+    ENDLOOP.
 
-    "@Todo: allow sicf/enforce SICF handling of error
     mi_server->response->set_cdata( '404, swagger' ).
     mi_server->response->set_status( code = 404 reason = '404' ).
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method text_reply.
+  METHOD text_reply.
 
-    field-symbols: <lg_any>       type any,
-                   <ls_meta>      like line of is_meta-parameters,
-                   <ls_parameter> like line of it_parameters.
+    FIELD-SYMBOLS: <lg_any>       TYPE any,
+                   <ls_meta>      LIKE LINE OF is_meta-parameters,
+                   <ls_parameter> LIKE LINE OF it_parameters.
 
 
-    read table is_meta-parameters assigning <ls_meta>
-      with key pardecltyp = c_parm_kind-returning.
-    if sy-subrc  = 0.
-      read table it_parameters assigning <ls_parameter>
-        with key name = <ls_meta>-sconame.
-      assert sy-subrc = 0.
+    READ TABLE is_meta-parameters ASSIGNING <ls_meta>
+      WITH KEY pardecltyp = c_parm_kind-returning.
+    IF sy-subrc  = 0.
+      READ TABLE it_parameters ASSIGNING <ls_parameter>
+        WITH KEY name = <ls_meta>-sconame.
+      ASSERT sy-subrc = 0.
 
-      assign <ls_parameter>-value->* to <lg_any>.
+      ASSIGN <ls_parameter>-value->* TO <lg_any>.
 
-      case <ls_meta>-type.
-        when 'XSTRING'.
+      CASE <ls_meta>-type.
+        WHEN 'XSTRING'.
           mi_server->response->set_data( <lg_any> ).
-        when 'STRING'.
+        WHEN 'STRING'.
           mi_server->response->set_cdata( <lg_any> ).
-        when others.
-          assert 0 = 1.
-      endcase.
-    endif.
+        WHEN OTHERS.
+          ASSERT 0 = 1.
+      ENDCASE.
+    ENDIF.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method validate_parameters.
+  METHOD validate_parameters.
 
 * no EXPORTING, no CHANGING
-    loop at it_parameters transporting no fields
-        where pardecltyp = c_parm_kind-exporting
-        or pardecltyp = c_parm_kind-changing.
-      assert 0 = 1.
-    endloop.
+    LOOP AT it_parameters TRANSPORTING NO FIELDS
+        WHERE pardecltyp = c_parm_kind-exporting
+        OR pardecltyp = c_parm_kind-changing.
+      ASSERT 0 = 1.
+    ENDLOOP.
 
 * no reference types
 * todo
 
 * todo, max one importing parameter? apart from path parameters?
 
-  endmethod.
-
-  method set_response_type_json.
-
-    mi_server->response->set_header_field( name  = 'content-type'
-                                           value = 'application/json' ).
-
-  endmethod.
-
-endclass.
+  ENDMETHOD.
+ENDCLASS.
