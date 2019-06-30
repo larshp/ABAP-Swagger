@@ -1,117 +1,117 @@
-CLASS zcl_swag_spec DEFINITION
-  PUBLIC
-  CREATE PUBLIC .
+class zcl_swag_spec definition
+  public
+  create public .
 
-  PUBLIC SECTION.
+  public section.
 
-    METHODS constructor
-      IMPORTING
-        !iv_title       TYPE clike
-        !iv_description TYPE clike
-        !it_meta        TYPE zcl_swag=>ty_meta_internal_tt
-        !iv_base        TYPE clike .
-    METHODS generate
-      RETURNING
-        VALUE(rv_spec) TYPE string .
-  PROTECTED SECTION.
+    methods constructor
+      importing
+        !iv_title       type clike
+        !iv_description type clike
+        !it_meta        type zcl_swag=>ty_meta_internal_tt
+        !iv_base        type clike .
+    methods generate
+      returning
+        value(rv_spec) type string .
+  protected section.
 
-    DATA mv_title TYPE string .
-    DATA mv_description TYPE string .
-    DATA mt_meta TYPE zcl_swag=>ty_meta_internal_tt .
-    DATA mv_base TYPE string .
-    DATA mt_definitions TYPE string_table .
+    data mv_title type string .
+    data mv_description type string .
+    data mt_meta type zcl_swag=>ty_meta_internal_tt .
+    data mv_base type string .
+    data mt_definitions type string_table .
 
-    METHODS definitions
-      RETURNING
-        VALUE(rv_defs) TYPE string .
-    METHODS path
-      IMPORTING
-        !is_meta       TYPE zcl_swag=>ty_meta_internal
-      RETURNING
-        VALUE(rv_path) TYPE string .
-    METHODS parameters
-      IMPORTING
-        !is_meta             TYPE zcl_swag=>ty_meta_internal
-      RETURNING
-        VALUE(rv_parameters) TYPE string .
-    METHODS response
-      IMPORTING
-        !is_meta           TYPE zcl_swag=>ty_meta_internal
-      RETURNING
-        VALUE(rv_response) TYPE string .
-  PRIVATE SECTION.
-ENDCLASS.
-
-
-
-CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
+    methods definitions
+      returning
+        value(rv_defs) type string .
+    methods path
+      importing
+        !is_meta       type zcl_swag=>ty_meta_internal
+      returning
+        value(rv_path) type string .
+    methods parameters
+      importing
+        !is_meta             type zcl_swag=>ty_meta_internal
+      returning
+        value(rv_parameters) type string .
+    methods response
+      importing
+        !is_meta           type zcl_swag=>ty_meta_internal
+      returning
+        value(rv_response) type string .
+  private section.
+endclass.
 
 
-  METHOD constructor.
+
+class zcl_swag_spec implementation.
+
+
+  method constructor.
 
     mv_title       = iv_title.
     mv_description = iv_description.
     mt_meta        = it_meta.
     mv_base        = iv_base.
 
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD definitions.
+  method definitions.
 
-    DATA: lv_string TYPE string,
-          lv_sep    TYPE string,
-          lt_string TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+    data: lv_string type string,
+          lv_sep    type string,
+          lt_string type standard table of string with default key.
 
 
-    APPEND '  "definitions":{' TO lt_string.
+    append '  "definitions":{' to lt_string.
 
     lv_sep = |,\n|.
-    CONCATENATE LINES OF mt_definitions INTO lv_string SEPARATED BY lv_sep.
-    APPEND lv_string TO lt_string.
+    concatenate lines of mt_definitions into lv_string separated by lv_sep.
+    append lv_string to lt_string.
 
-    APPEND '  }' TO lt_string.
+    append '  }' to lt_string.
 
-    CONCATENATE LINES OF lt_string INTO rv_defs
-      SEPARATED BY cl_abap_char_utilities=>newline.
+    concatenate lines of lt_string into rv_defs
+      separated by cl_abap_char_utilities=>newline.
 
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD generate.
+  method generate.
 
-    DEFINE _add.
+    define _add.
       CONCATENATE rv_spec &1 cl_abap_char_utilities=>newline
         INTO rv_spec ##NO_TEXT.
-    END-OF-DEFINITION.
+    end-of-definition.
 
-    TYPES: BEGIN OF ty_path,
-             path TYPE string,
-             meta LIKE mt_meta,
-           END OF ty_path.
+    types: begin of ty_path,
+             path type string,
+             meta like mt_meta,
+           end of ty_path.
 
-    DATA: lv_index     TYPE i,
-          lt_paths     TYPE TABLE OF ty_path,
-          lv_last_path TYPE abap_bool,
-          lv_last_meta TYPE abap_bool,
-          lv_path      TYPE string,
-          lv_tags      TYPE string,
-          lv_add       TYPE string.
+    data: lv_index     type i,
+          lt_paths     type table of ty_path,
+          lv_last_path type abap_bool,
+          lv_last_meta type abap_bool,
+          lv_path      type string,
+          lv_tags      type string,
+          lv_add       type string.
 
-    FIELD-SYMBOLS: <ls_path> LIKE LINE OF lt_paths,
-                   <ls_meta> LIKE LINE OF mt_meta.
+    field-symbols: <ls_path> like line of lt_paths,
+                   <ls_meta> like line of mt_meta.
 
 
 * handle path with multiple handlers(ie. GET and POST)
-    LOOP AT mt_meta ASSIGNING <ls_meta>.
+    loop at mt_meta assigning <ls_meta>.
       lv_path = path( <ls_meta> ).
-      READ TABLE lt_paths ASSIGNING <ls_path> WITH KEY path = lv_path.
-      IF sy-subrc <> 0.
-        APPEND INITIAL LINE TO lt_paths ASSIGNING <ls_path>.
+      read table lt_paths assigning <ls_path> with key path = lv_path.
+      if sy-subrc <> 0.
+        append initial line to lt_paths assigning <ls_path>.
         <ls_path>-path = lv_path.
-      ENDIF.
-      APPEND <ls_meta> TO <ls_path>-meta.
-    ENDLOOP.
+      endif.
+      append <ls_meta> to <ls_path>-meta.
+    endloop.
 
     _add '{'.
     _add '  "swagger":"2.0",'.
@@ -146,23 +146,23 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
     _add '  ],'.
     _add '  "paths":{'.
 
-    LOOP AT lt_paths ASSIGNING <ls_path>.
+    loop at lt_paths assigning <ls_path>.
       lv_last_path = boolc( sy-tabix = lines( lt_paths ) ).
 
       lv_add = |    "{ <ls_path>-path }":\{|.
       _add lv_add.
 
-      LOOP AT <ls_path>-meta ASSIGNING <ls_meta>.
+      loop at <ls_path>-meta assigning <ls_meta>.
         lv_last_meta = boolc( sy-tabix = lines( <ls_path>-meta ) ).
 
         lv_add = |      "{ to_lower( <ls_meta>-meta-method ) }":\{|.
         _add lv_add.
 
-        IF lines( <ls_meta>-meta-tags ) > 0.
-          CONCATENATE LINES OF <ls_meta>-meta-tags INTO lv_tags SEPARATED BY '", "'.
+        if lines( <ls_meta>-meta-tags ) > 0.
+          concatenate lines of <ls_meta>-meta-tags into lv_tags separated by '", "'.
           lv_add = |        "tags":["{ lv_tags }"],|.
           _add lv_add.
-        ENDIF.
+        endif.
 
         lv_add = |        "summary":"{ <ls_meta>-meta-summary }",|.
         _add lv_add.
@@ -174,14 +174,14 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
 
         _add '        "produces":['.
 
-        READ TABLE <ls_meta>-parameters WITH KEY
+        read table <ls_meta>-parameters with key
           pardecltyp = zcl_swag=>c_parm_kind-returning
-          type = 'STRING' TRANSPORTING NO FIELDS.
-        IF sy-subrc = 0.
+          type = 'STRING' transporting no fields.
+        if sy-subrc = 0.
           _add '"text/plain"'.
-        ELSE.
+        else.
           _add '"application/json"'.
-        ENDIF.
+        endif.
 
         _add '        ],'.
         _add '        "responses":{'.
@@ -201,16 +201,16 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
         _add '        }'.
         _add '      }'.
 
-        IF lv_last_meta = abap_false.
+        if lv_last_meta = abap_false.
           _add ','.
-        ENDIF.
-      ENDLOOP.
+        endif.
+      endloop.
 
       _add '    }'.
-      IF lv_last_path = abap_false.
+      if lv_last_path = abap_false.
         _add ','.
-      ENDIF.
-    ENDLOOP.
+      endif.
+    endloop.
 
     _add '  },'.
 
@@ -219,133 +219,137 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
 
     _add '}'.
 
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD parameters.
+  method parameters.
 
-    DATA: lt_string TYPE TABLE OF string,
-          ls_string LIKE LINE OF lt_string,
-          lv_type   TYPE string,
-          lo_map    TYPE REF TO zcl_swag_map_type.
+    data: lt_string type table of string,
+          ls_string like line of lt_string,
+          lv_type   type string,
+          lo_map    type ref to zcl_swag_map_type.
 
-    FIELD-SYMBOLS: <ls_parameter> LIKE LINE OF is_meta-parameters.
+    field-symbols: <ls_parameter> like line of is_meta-parameters.
 
 
-    APPEND '"parameters":[' TO lt_string.
+    append '"parameters":[' to lt_string.
 
-    LOOP AT is_meta-parameters ASSIGNING <ls_parameter>
-        WHERE pardecltyp = zcl_swag=>c_parm_kind-importing.
+    loop at is_meta-parameters assigning <ls_parameter>
+        where pardecltyp = zcl_swag=>c_parm_kind-importing.
 
-      APPEND '{' TO lt_string.
+      append '{' to lt_string.
 
-      CONCATENATE '"name":"' <ls_parameter>-sconame '",' INTO ls_string.
-      APPEND ls_string TO lt_string.
+      data(lv_camel_cased) = /ui2/cl_json=>serialize(
+          data             =  <ls_parameter>-sconame
+          pretty_name      = /ui2/cl_json=>pretty_mode-camel_case
+      ).
+      concatenate '"name":"' lv_camel_cased '",' into ls_string.
+      append ls_string to lt_string.
 
-      READ TABLE is_meta-meta-url-group_names FROM <ls_parameter>-sconame
-        TRANSPORTING NO FIELDS.
-      IF sy-subrc = 0.
-        APPEND '"in":"path",' TO lt_string.
-      ELSEIF is_meta-meta-method = zcl_swag=>c_method-get.
-        APPEND '"in":"query",' TO lt_string.
-      ELSE.
-        APPEND '"in":"body",' TO lt_string.
-      ENDIF.
+      read table is_meta-meta-url-group_names from <ls_parameter>-sconame
+        transporting no fields.
+      if sy-subrc = 0.
+        append '"in":"path",' to lt_string.
+      elseif is_meta-meta-method = zcl_swag=>c_method-get.
+        append '"in":"query",' to lt_string.
+      else.
+        append '"in":"body",' to lt_string.
+      endif.
 
-      APPEND '"description":"",' TO lt_string.
+      append '"description":"",' to lt_string.
 
-      CREATE OBJECT lo_map
-        EXPORTING
+      create object lo_map
+        exporting
           is_param = <ls_parameter>.
       lv_type = lo_map->map( ).
-      CONCATENATE lv_type ',' INTO ls_string.
-      APPEND ls_string TO lt_string.
+      concatenate lv_type ',' into ls_string.
+      append ls_string to lt_string.
 
-      IF <ls_parameter>-paroptionl = abap_true.
-        APPEND '"required":false' TO lt_string.
-      ELSE.
-        APPEND '"required":true' TO lt_string.
-      ENDIF.
+      if <ls_parameter>-paroptionl = abap_true.
+        append '"required":false' to lt_string.
+      else.
+        append '"required":true' to lt_string.
+      endif.
 
-      APPEND '},' TO lt_string.
-    ENDLOOP.
-    IF sy-subrc = 0.
+      append '},' to lt_string.
+    endloop.
+    if sy-subrc = 0.
 * fix the comma
-      DELETE lt_string INDEX lines( lt_string ).
-      APPEND '}' TO lt_string.
-    ENDIF.
+      delete lt_string index lines( lt_string ).
+      append '}' to lt_string.
+    endif.
 
-    APPEND '],' TO lt_string.
+    append '],' to lt_string.
 
-    CONCATENATE LINES OF lt_string INTO rv_parameters
-      SEPARATED BY cl_abap_char_utilities=>newline.
+    concatenate lines of lt_string into rv_parameters
+      separated by cl_abap_char_utilities=>newline.
 
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD path.
+  method path.
 
-    DATA: lv_name    TYPE string,
-          lv_offset1 TYPE i,
-          lv_offset2 TYPE i.
+    data: lv_name    type string,
+          lv_offset1 type i,
+          lv_offset2 type i.
 
 
     rv_path = is_meta-meta-url-regex.
 
-    REPLACE ALL OCCURRENCES OF '$' IN rv_path WITH ''.
+    replace all occurrences of '$' in rv_path with ''.
 
 * replace the regex groups like (\w*) with swagger identifies {IV_NAME}
-    LOOP AT is_meta-meta-url-group_names INTO lv_name.
-      FIND FIRST OCCURRENCE OF '(' IN rv_path MATCH OFFSET lv_offset1.
-      FIND FIRST OCCURRENCE OF ')' IN rv_path MATCH OFFSET lv_offset2.
+    loop at is_meta-meta-url-group_names into lv_name.
+      find first occurrence of '(' in rv_path match offset lv_offset1.
+      find first occurrence of ')' in rv_path match offset lv_offset2.
       lv_offset2 = lv_offset2 + 1.
-      CONCATENATE rv_path(lv_offset1) '{' lv_name '}' rv_path+lv_offset2 INTO rv_path.
-    ENDLOOP.
+      concatenate rv_path(lv_offset1) '{' lv_name '}' rv_path+lv_offset2 into rv_path.
+    endloop.
 
-  ENDMETHOD.
-
-
-  METHOD response.
-
-    DATA: lt_string TYPE TABLE OF string,
-          lv_type   TYPE string,
-          lv_string TYPE string,
-          lo_map    TYPE REF TO zcl_swag_map_type.
-
-    FIELD-SYMBOLS: <ls_parameter> LIKE LINE OF is_meta-parameters.
+  endmethod.
 
 
-    APPEND '"200": {' TO lt_string.
+  method response.
 
-    READ TABLE is_meta-parameters WITH KEY pardecltyp = zcl_swag=>c_parm_kind-returning
-      TRANSPORTING NO FIELDS.
-    IF sy-subrc = 0.
-      APPEND '  "description": "successful operation",' TO lt_string.
-    ELSE.
-      APPEND '  "description": "successful operation"' TO lt_string.
-    ENDIF.
+    data: lt_string type table of string,
+          lv_type   type string,
+          lv_string type string,
+          lo_map    type ref to zcl_swag_map_type.
 
-    LOOP AT is_meta-parameters ASSIGNING <ls_parameter>
-        WHERE pardecltyp = zcl_swag=>c_parm_kind-returning.
-      CREATE OBJECT lo_map
-        EXPORTING
+    field-symbols: <ls_parameter> like line of is_meta-parameters.
+
+
+    append '"200": {' to lt_string.
+
+    read table is_meta-parameters with key pardecltyp = zcl_swag=>c_parm_kind-returning
+      transporting no fields.
+    if sy-subrc = 0.
+      append '  "description": "successful operation",' to lt_string.
+    else.
+      append '  "description": "successful operation"' to lt_string.
+    endif.
+
+    loop at is_meta-parameters assigning <ls_parameter>
+        where pardecltyp = zcl_swag=>c_parm_kind-returning.
+      create object lo_map
+        exporting
           is_param  = <ls_parameter>
           iv_schema = abap_false.
       lv_type = lo_map->map( ).
 
-      APPEND '"schema": {' TO lt_string.
+      append '"schema": {' to lt_string.
       lv_string = |"$ref": "#/definitions/{ is_meta-meta-handler }_Response"|.
-      APPEND lv_string TO lt_string.
-      APPEND '}' TO lt_string.
+      append lv_string to lt_string.
+      append '}' to lt_string.
 
       lv_string = |"{ is_meta-meta-handler }_Response":\{"type": "object","properties": \{"DATA": \{{ lv_type }\}\}\}|.
-      APPEND lv_string TO mt_definitions.
-    ENDLOOP.
+      append lv_string to mt_definitions.
+    endloop.
 
-    APPEND '},' TO lt_string.
+    append '},' to lt_string.
 
-    CONCATENATE LINES OF lt_string INTO rv_response
-      SEPARATED BY cl_abap_char_utilities=>newline.
+    concatenate lines of lt_string into rv_response
+      separated by cl_abap_char_utilities=>newline.
 
-  ENDMETHOD.
-ENDCLASS.
+  endmethod.
+endclass.
