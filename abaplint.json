@@ -14,7 +14,7 @@
     "avoid_use": {
       "enabled": true,
       "exclude": [],
-      "define": true,
+      "define": false,
       "endselect": true,
       "execSQL": true,
       "kernelCall": true
