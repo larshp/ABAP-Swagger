@@ -175,7 +175,7 @@
     "method_length": {
       "enabled": true,
       "exclude": [],
-      "statements": 100
+      "statements": 110
     },
     "method_parameter_names": {
       "enabled": true,
