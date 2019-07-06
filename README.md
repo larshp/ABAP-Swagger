@@ -1,4 +1,4 @@
-[![abaplint](https://abaplint.org/badges/larshp/ABAP-Swagger)](https://abaplint.org/project/larshp/ABAP-Swagger)
+[![abaplint](https://app.abaplint.org/badges/larshp/ABAP-Swagger)](https://app.abaplint.org/project/larshp/ABAP-Swagger)
 
 # ABAP-Swagger
 
