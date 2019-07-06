@@ -87,7 +87,7 @@ CLASS ZCL_SWAG_MAP_TYPE IMPLEMENTATION.
 
     rv_type = map_internal( get_typedescr( ms_param ) ).
 
-  ENDMETHOD.                    "map
+  ENDMETHOD.
 
 
   METHOD map_element.
