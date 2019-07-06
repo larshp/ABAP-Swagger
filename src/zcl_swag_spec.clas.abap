@@ -326,7 +326,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
     lv_type = lo_map->map( ).
 
 * todo, basic/simple types?
-    lv_string = |"{ is_meta-meta-handler }_Request":\{"type": "object","properties": \{"DATA": \{{ lv_type }\}\}\}|.
+    lv_string = |"{ is_meta-meta-handler }_Request": \{{ lv_type }\}|.
     APPEND lv_string TO mt_definitions.
 
   ENDMETHOD.
