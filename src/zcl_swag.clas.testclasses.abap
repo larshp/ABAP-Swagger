@@ -41,9 +41,7 @@ CLASS ltcl_swag IMPLEMENTATION.
 
     lo_conv = cl_abap_conv_in_ce=>create( input = iv_xstr ).
 
-    lo_conv->read(
-      IMPORTING
-        data = rv_str ).
+    lo_conv->read( IMPORTING data = rv_str ).
 
   ENDMETHOD.                    "to_string
 
