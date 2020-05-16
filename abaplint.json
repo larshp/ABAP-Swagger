@@ -19,6 +19,9 @@
     "globalMacros": []
   },
   "rules": {
+    "forbidden_identifier": false,
+    "try_without_catch": true,
+    "unknown_types": false,
     "7bit_ascii": true,
     "abapdoc": false,
     "allowed_object_naming": true,
@@ -52,6 +55,8 @@
       "ignoreNames": [],
       "ignorePatterns": [],
       "ignoreExceptions": true,
+      "constants": "",
+      "ignoreLocal": false,
       "statics": "^G._.+$",
       "instance": "^M._.+$"
     },
@@ -129,6 +134,7 @@
       "exclude": [],
       "reason": "",
       "style": "upper",
+      "ignoreKeywords": [],
       "ignoreExceptions": true,
       "ignoreLowerClassImplmentationStatement": true,
       "ignoreGlobalClassDefinition": false,
@@ -217,6 +223,8 @@
       "prog": "^Z",
       "fugr": "^Z",
       "tabl": "^Z",
+      "ssfo": "^Z",
+      "ssst": "^Z",
       "ttyp": "^Z",
       "dtel": "^Z",
       "doma": "^Z",
@@ -238,6 +246,7 @@
       "multiply": true,
       "move": true,
       "divide": true,
+      "setExtended": true,
       "requested": true,
       "occurs": true
     },
