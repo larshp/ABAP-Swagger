@@ -228,7 +228,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
   METHOD parameters.
 
     DATA: lt_string TYPE TABLE OF string,
-          ls_string LIKE LINE OF lt_string,
+          lv_string LIKE LINE OF lt_string,
           lv_type   TYPE string,
           lo_map    TYPE REF TO zcl_swag_map_type.
 
@@ -241,8 +241,8 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
         WHERE pardecltyp = zcl_swag=>c_parm_kind-importing.
       APPEND '{' TO lt_string.
 
-      CONCATENATE '"name":"' <ls_parameter>-sconame '",' INTO ls_string.
-      APPEND ls_string TO lt_string.
+      CONCATENATE '"name":"' <ls_parameter>-sconame '",' INTO lv_string.
+      APPEND lv_string TO lt_string.
 
       READ TABLE is_meta-meta-url-group_names FROM <ls_parameter>-sconame
         TRANSPORTING NO FIELDS.
@@ -252,7 +252,8 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
         APPEND '"in":"query",' TO lt_string.
       ELSE.
         APPEND '"in":"body",' TO lt_string.
-        APPEND '"schema": {"$ref": "#/definitions/' && is_meta-meta-handler && '_Request"}' TO lt_string.
+        lv_string = |"schema": \{"$ref": "#/definitions/' { is_meta-meta-handler } '_Request"\}|.
+        APPEND lv_string TO lt_string.
         APPEND '},' TO lt_string.
         request( is_meta     = is_meta
                  is_parameter = <ls_parameter> ).
@@ -265,8 +266,8 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
         EXPORTING
           is_param = <ls_parameter>.
       lv_type = lo_map->map( ).
-      CONCATENATE lv_type ',' INTO ls_string.
-      APPEND ls_string TO lt_string.
+      CONCATENATE lv_type ',' INTO lv_string.
+      APPEND lv_string TO lt_string.
 
       IF <ls_parameter>-paroptionl = abap_true.
         APPEND '"required":false' TO lt_string.
