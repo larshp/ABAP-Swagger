@@ -20,12 +20,10 @@ CLASS ltcl_swag DEFINITION FOR TESTING
           mo_dummy_handler TYPE REF TO zcl_dummy_swagger_handler.
 
     METHODS: setup,
-
       given_a_foobar_meta
         IMPORTING
           iv_remove_data_object TYPE any OPTIONAL
             PREFERRED PARAMETER iv_remove_data_object,
-
       new_swag_instance,
       test FOR TESTING RAISING cx_static_check,
       remove_data_object_setting FOR TESTING.
@@ -133,9 +131,7 @@ CLASS ltcl_swag IMPLEMENTATION.
   METHOD remove_data_object_setting.
 
     "Keep DATA
-    given_a_foobar_meta(
-        iv_remove_data_object = abap_false
-    ).
+    given_a_foobar_meta( iv_remove_data_object = abap_false ).
 
     mo_swag->register( mo_dummy_handler ).
     mo_swag->run( ).
@@ -149,9 +145,7 @@ CLASS ltcl_swag IMPLEMENTATION.
     new_swag_instance( ).
 
     "Remove DATA
-    given_a_foobar_meta(
-        iv_remove_data_object = abap_true
-    ).
+    given_a_foobar_meta( iv_remove_data_object = abap_true ).
 
     mo_swag->register( mo_dummy_handler ).
     mo_swag->run( ).
@@ -170,7 +164,7 @@ CLASS ltcl_swag IMPLEMENTATION.
 
 
     APPEND INITIAL LINE TO lt_foo_bar_meta ASSIGNING <ls_meta>.
-    <ls_meta>-summary   = 'this is the description'(001).
+    <ls_meta>-summary   = 'this is the description'.
     <ls_meta>-url-regex = '/swag/(\w*)/(\w*)'.
     APPEND 'IV_FOO' TO <ls_meta>-url-group_names.
     APPEND 'IV_BAR' TO <ls_meta>-url-group_names.
@@ -178,9 +172,7 @@ CLASS ltcl_swag IMPLEMENTATION.
     <ls_meta>-handler   = 'THE_REAL_STUFF'.
     <ls_meta>-response_settings-remove_data_object = iv_remove_data_object.
 
-    mo_dummy_handler->set_meta(
-        lt_foo_bar_meta
-    ).
+    mo_dummy_handler->set_meta( lt_foo_bar_meta ).
 
   ENDMETHOD.
 

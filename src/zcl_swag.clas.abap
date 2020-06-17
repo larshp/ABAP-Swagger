@@ -20,9 +20,9 @@ CLASS zcl_swag DEFINITION
         group_names TYPE STANDARD TABLE OF seosconame WITH DEFAULT KEY,
       END OF ty_url .
     TYPES:
-      BEGIN OF sty_response,
+      BEGIN OF ty_response,
         remove_data_object TYPE abap_bool,
-      END OF sty_response.
+      END OF ty_response.
     TYPES:
       BEGIN OF ty_meta,
         summary           TYPE string,
@@ -30,7 +30,7 @@ CLASS zcl_swag DEFINITION
         method            TYPE string,
         handler           TYPE string,
         tags              TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
-        response_settings TYPE sty_response,
+        response_settings TYPE ty_response,
       END OF ty_meta .
     TYPES:
       BEGIN OF ty_meta_internal,
@@ -121,7 +121,7 @@ CLASS zcl_swag DEFINITION
   PRIVATE SECTION.
     METHODS handle_response
       IMPORTING
-        is_meta          TYPE zcl_swag=>ty_meta_internal
+        is_meta          TYPE ty_meta_internal
         iv_abap_response TYPE any
       CHANGING
         cv_data          TYPE xstring
@@ -132,7 +132,7 @@ CLASS zcl_swag DEFINITION
         cx_sy_conversion_codepage .
     METHODS handle_remove_data_object
       IMPORTING
-        is_meta           TYPE zcl_swag=>ty_meta_internal
+        is_meta           TYPE ty_meta_internal
       CHANGING
         cv_data_as_string TYPE string
       RAISING
@@ -638,9 +638,7 @@ CLASS zcl_swag IMPLEMENTATION.
       lv_data_as_string    TYPE string.
 
     lo_xstring_to_string = cl_abap_conv_in_ce=>create( input = cv_data ).
-    lo_xstring_to_string->read(
-      IMPORTING
-        data = lv_data_as_string ).
+    lo_xstring_to_string->read( IMPORTING data = lv_data_as_string ).
 
     handle_remove_data_object(
           EXPORTING
@@ -653,8 +651,7 @@ CLASS zcl_swag IMPLEMENTATION.
       EXPORTING
           data = lv_data_as_string
       IMPORTING
-          buffer = cv_data
-    ).
+          buffer = cv_data ).
 
 
   ENDMETHOD.
@@ -662,22 +659,19 @@ CLASS zcl_swag IMPLEMENTATION.
 
   METHOD handle_remove_data_object.
 
+    DATA lv_length TYPE i.
+    DATA lv_minus_data TYPE i.
+
     IF is_meta-meta-response_settings-remove_data_object = abap_true.
 
-      DATA lv_length TYPE i.
-      DATA lv_minus_data TYPE i.
       lv_length = strlen( cv_data_as_string ).
       lv_minus_data = lv_length - 9.
 
-      IF lv_minus_data <= 0.
-        RETURN.
-      ENDIF.
       "start has |{"DATA":| (8) end has |}| (1)
       cv_data_as_string = cv_data_as_string+8(lv_minus_data).
+
     ENDIF.
 
   ENDMETHOD.
-
-
 
 ENDCLASS.

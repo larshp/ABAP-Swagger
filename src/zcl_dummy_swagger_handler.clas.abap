@@ -1,51 +1,51 @@
-class zcl_dummy_swagger_handler definition create public
-for testing
-public.
+CLASS zcl_dummy_swagger_handler DEFINITION CREATE PUBLIC
+  FOR TESTING
+  PUBLIC.
 
-  public section.
-    interfaces zif_swag_handler.
-    types:
-      begin of ty_structure,
-        foo type string,
-        bar type string,
-        foo_bar type string,
-      end of ty_structure.
+  PUBLIC SECTION.
+    INTERFACES zif_swag_handler.
+    TYPES:
+      BEGIN OF ty_structure,
+        foo     TYPE string,
+        bar     TYPE string,
+        foo_bar TYPE string,
+      END OF ty_structure.
 
-    methods the_real_stuff
-      importing
-        !iv_foo        type string optional
-        !iv_bar        type string optional
-      returning
-        value(rs_data) type ty_structure.
-    methods
+    METHODS the_real_stuff
+      IMPORTING
+        !iv_foo        TYPE string OPTIONAL
+        !iv_bar        TYPE string OPTIONAL
+      RETURNING
+        VALUE(rs_data) TYPE ty_structure.
+    METHODS
       set_meta
-        importing
-          it_meta type zcl_swag=>ty_meta_tt.
-  protected section.
-  private section.
-    data mt_meta type zcl_swag=>ty_meta_tt.
+        IMPORTING
+          it_meta TYPE zcl_swag=>ty_meta_tt.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+    DATA mt_meta TYPE zcl_swag=>ty_meta_tt.
 
-endclass.
+ENDCLASS.
 
-class zcl_dummy_swagger_handler implementation.
+CLASS zcl_dummy_swagger_handler IMPLEMENTATION.
 
-  method the_real_stuff.
+  METHOD the_real_stuff.
 
-    concatenate iv_foo iv_bar into rs_data-foo.
+    CONCATENATE iv_foo iv_bar INTO rs_data-foo.
     rs_data-bar = iv_bar.
     rs_data-foo_bar = 'FOO_BAR'.
 
-  endmethod.
+  ENDMETHOD.
 
 
-  method zif_swag_handler~meta.
+  METHOD zif_swag_handler~meta.
 
     rt_meta = mt_meta.
 
-  endmethod.
+  ENDMETHOD.
 
-  method set_meta.
+  METHOD set_meta.
     mt_meta = it_meta.
-  endmethod.
+  ENDMETHOD.
 
-endclass.
+ENDCLASS.
