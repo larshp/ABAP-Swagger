@@ -664,12 +664,14 @@ CLASS zcl_swag IMPLEMENTATION.
 
     IF is_meta-meta-response_settings-remove_data_object = abap_true.
 
-
       DATA lv_length TYPE i.
       DATA lv_minus_data TYPE i.
       lv_length = strlen( cv_data_as_string ).
       lv_minus_data = lv_length - 9.
 
+      IF lv_minus_data <= 0.
+        RETURN.
+      ENDIF.
       "start has |{"DATA":| (8) end has |}| (1)
       cv_data_as_string = cv_data_as_string+8(lv_minus_data).
     ENDIF.
