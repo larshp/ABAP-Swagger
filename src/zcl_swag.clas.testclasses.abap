@@ -112,7 +112,7 @@ CLASS ltcl_swag IMPLEMENTATION.
   ENDMETHOD.                    "test
 
   METHOD if_http_entity~set_cdata.
-    mv_reply = to_string( CONV #( data ) ).
+    mv_reply = data.
   ENDMETHOD.                    "if_http_entity~set_data
 
   METHOD if_http_request~get_form_field.
