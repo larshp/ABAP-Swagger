@@ -20,13 +20,12 @@ CLASS ltcl_swag DEFINITION FOR TESTING
           mo_dummy_handler TYPE REF TO zcl_dummy_swagger_handler.
 
     METHODS: setup,
-      given_a_foobar_meta
-        IMPORTING
-          iv_remove_data_object TYPE any OPTIONAL
-            PREFERRED PARAMETER iv_remove_data_object,
-      new_swag_instance,
       test FOR TESTING RAISING cx_static_check,
-      remove_data_object_setting FOR TESTING.
+      remove_data_object_setting FOR TESTING,
+      new_swag_instance,
+      given_a_foobar_meta
+      IMPORTING
+        iv_remove_data_object TYPE abap_bool OPTIONAL.
 
     CLASS-METHODS: to_string
       IMPORTING iv_xstr       TYPE xstring
