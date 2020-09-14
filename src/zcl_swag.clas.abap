@@ -118,7 +118,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_SWAG IMPLEMENTATION.
+CLASS zcl_swag IMPLEMENTATION.
 
 
   METHOD build_parameters.
@@ -487,7 +487,8 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
     DATA: lv_path       TYPE string,
           lv_method     TYPE string,
-          lt_parameters TYPE abap_parmbind_tab.
+          lt_parameters TYPE abap_parmbind_tab,
+          lx_swag       TYPE REF TO zcx_swag.
 
     FIELD-SYMBOLS: <ls_meta> LIKE LINE OF mt_meta.
 
@@ -514,8 +515,15 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       IF sy-subrc = 0.
 
         lt_parameters = build_parameters( <ls_meta> ).
-        CALL METHOD <ls_meta>-obj->(<ls_meta>-meta-handler)
-          PARAMETER-TABLE lt_parameters.
+
+        TRY.
+            CALL METHOD <ls_meta>-obj->(<ls_meta>-meta-handler)
+              PARAMETER-TABLE lt_parameters.
+          CATCH zcx_swag INTO lx_swag.
+            mi_server->response->set_cdata( |{ lx_swag->status_code }, { lx_swag->get_text( ) }| ).
+            mi_server->response->set_status( code = lx_swag->status_code reason = lx_swag->get_text( ) ).
+            RETURN.
+        ENDTRY.
 
         mi_server->response->set_compression( ).
 
