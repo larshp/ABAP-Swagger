@@ -252,7 +252,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
         APPEND '"in":"query",' TO lt_string.
       ELSE.
         APPEND '"in":"body",' TO lt_string.
-        lv_string = |"schema": \{"$ref": "#/definitions/' { is_meta-meta-handler } '_Request"\}|.
+        lv_string = |"schema": \{"$ref": "#/definitions/{ is_meta-meta-handler }_Request"\}|.
         APPEND lv_string TO lt_string.
         APPEND '},' TO lt_string.
         request( is_meta     = is_meta
