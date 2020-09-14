@@ -178,7 +178,7 @@
     "method_length": {
       "exclude": [],
       "reason": "",
-      "statements": 110,
+      "statements": 160,
       "errorWhenEmpty": true,
       "ignoreTestClasses": false
     },
