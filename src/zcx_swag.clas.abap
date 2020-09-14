@@ -36,19 +36,19 @@ CLASS zcx_swag DEFINITION
 
   PROTECTED SECTION.
     TYPES:
-      BEGIN OF ts_t100_message,
+      BEGIN OF ty_t100_message,
         key   TYPE scx_t100key,
         msgv1 TYPE symsgv,
         msgv2 TYPE symsgv,
         msgv3 TYPE symsgv,
         msgv4 TYPE symsgv,
-      END OF ts_t100_message.
+      END OF ty_t100_message.
 
     CLASS-METHODS text_to_t100key
       IMPORTING
-        text               TYPE csequence
+        text             TYPE csequence
       RETURNING
-        VALUE(t100message) TYPE ts_t100_message.
+        VALUE(rs_result) TYPE ty_t100_message.
 
   PRIVATE SECTION.
 
@@ -57,39 +57,6 @@ ENDCLASS.
 
 
 CLASS zcx_swag IMPLEMENTATION.
-
-
-  METHOD raise_system.
-
-    RAISE EXCEPTION TYPE zcx_swag
-      EXPORTING
-        textid = VALUE scx_t100key( msgid = sy-msgid
-                                    msgno = sy-msgno
-                                    attr1 = 'TEXT1'
-                                    attr2 = 'TEXT2'
-                                    attr3 = 'TEXT3'
-                                    attr4 = 'TEXT4' )
-        text1  = CONV #( sy-msgv1 )
-        text2  = CONV #( sy-msgv2 )
-        text3  = CONV #( sy-msgv3 )
-        text4  = CONV #( sy-msgv4 ).
-
-  ENDMETHOD.
-
-
-  METHOD raise_text.
-
-    DATA(t100_message) = text_to_t100key( text ).
-
-    RAISE EXCEPTION TYPE zcx_swag
-      EXPORTING
-        textid = t100_message-key
-        text1  = CONV #( t100_message-msgv1 )
-        text2  = CONV #( t100_message-msgv2 )
-        text3  = CONV #( t100_message-msgv3 )
-        text4  = CONV #( t100_message-msgv4 ).
-
-  ENDMETHOD.
 
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
@@ -119,31 +86,62 @@ CLASS zcx_swag IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD text_to_t100key.
+  METHOD raise_system.
 
-    DATA:
-      BEGIN OF message_variables,
-        msgv1 TYPE symsgv,
-        msgv2 TYPE symsgv,
-        msgv3 TYPE symsgv,
-        msgv4 TYPE symsgv,
-      END OF message_variables.
-
-    message_variables = text.
-
-    t100message-key = VALUE scx_t100key( msgid = '00'
-                                         msgno = '001'
-                                         attr1 = 'TEXT1'
-                                         attr2 = 'TEXT2'
-                                         attr3 = 'TEXT3'
-                                         attr4 = 'TEXT4' ).
-
-    t100message-msgv1 = message_variables-msgv1.
-    t100message-msgv2 = message_variables-msgv2.
-    t100message-msgv3 = message_variables-msgv3.
-    t100message-msgv4 = message_variables-msgv4.
+    RAISE EXCEPTION TYPE zcx_swag
+      EXPORTING
+        textid = VALUE scx_t100key( msgid = sy-msgid
+                                    msgno = sy-msgno
+                                    attr1 = 'TEXT1'
+                                    attr2 = 'TEXT2'
+                                    attr3 = 'TEXT3'
+                                    attr4 = 'TEXT4' )
+        text1  = CONV #( sy-msgv1 )
+        text2  = CONV #( sy-msgv2 )
+        text3  = CONV #( sy-msgv3 )
+        text4  = CONV #( sy-msgv4 ).
 
   ENDMETHOD.
 
 
+  METHOD raise_text.
+
+    DATA(ls_t100_message) = text_to_t100key( text ).
+
+    RAISE EXCEPTION TYPE zcx_swag
+      EXPORTING
+        textid = ls_t100_message-key
+        text1  = CONV #( ls_t100_message-msgv1 )
+        text2  = CONV #( ls_t100_message-msgv2 )
+        text3  = CONV #( ls_t100_message-msgv3 )
+        text4  = CONV #( ls_t100_message-msgv4 ).
+
+  ENDMETHOD.
+
+
+  METHOD text_to_t100key.
+
+    DATA:
+      BEGIN OF ls_message_variables,
+        msgv1 TYPE symsgv,
+        msgv2 TYPE symsgv,
+        msgv3 TYPE symsgv,
+        msgv4 TYPE symsgv,
+      END OF ls_message_variables.
+
+    ls_message_variables = text.
+
+    rs_result-key = VALUE scx_t100key( msgid = '00'
+                                       msgno = '001'
+                                       attr1 = 'TEXT1'
+                                       attr2 = 'TEXT2'
+                                       attr3 = 'TEXT3'
+                                       attr4 = 'TEXT4' ).
+
+    rs_result-msgv1 = ls_message_variables-msgv1.
+    rs_result-msgv2 = ls_message_variables-msgv2.
+    rs_result-msgv3 = ls_message_variables-msgv3.
+    rs_result-msgv4 = ls_message_variables-msgv4.
+
+  ENDMETHOD.
 ENDCLASS.
