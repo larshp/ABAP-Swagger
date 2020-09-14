@@ -20,12 +20,17 @@ CLASS zcl_swag DEFINITION
         group_names TYPE STANDARD TABLE OF seosconame WITH DEFAULT KEY,
       END OF ty_url .
     TYPES:
+      BEGIN OF ty_response,
+        remove_data_object TYPE abap_bool,
+      END OF ty_response.
+    TYPES:
       BEGIN OF ty_meta,
-        summary TYPE string,
-        url     TYPE ty_url,
-        method  TYPE string,
-        handler TYPE string,
-        tags    TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
+        summary           TYPE string,
+        url               TYPE ty_url,
+        method            TYPE string,
+        handler           TYPE string,
+        tags              TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
+        response_settings TYPE ty_response,
       END OF ty_meta .
     TYPES:
       BEGIN OF ty_meta_internal,
@@ -114,6 +119,27 @@ CLASS zcl_swag DEFINITION
       IMPORTING
         !it_parameters TYPE ty_parameters_tt .
   PRIVATE SECTION.
+    METHODS handle_response
+      IMPORTING
+        is_meta          TYPE ty_meta_internal
+        iv_abap_response TYPE any
+      CHANGING
+        cv_data          TYPE xstring
+      RAISING
+        cx_parameter_invalid_range
+        cx_parameter_invalid_type
+        cx_sy_codepage_converter_init
+        cx_sy_conversion_codepage .
+    METHODS handle_remove_data_object
+      IMPORTING
+        is_meta           TYPE ty_meta_internal
+      CHANGING
+        cv_data_as_string TYPE string
+      RAISING
+        cx_parameter_invalid_range
+        cx_parameter_invalid_type
+        cx_sy_codepage_converter_init
+        cx_sy_conversion_codepage.
 ENDCLASS.
 
 
@@ -438,6 +464,14 @@ CLASS zcl_swag IMPLEMENTATION.
 
     ENDIF.
 
+    IF is_meta-meta-response_settings IS NOT INITIAL.
+      handle_response(
+            EXPORTING
+              is_meta = is_meta
+              iv_abap_response = <lg_struc>
+            CHANGING
+              cv_data = lv_data ).
+    ENDIF.
     mi_server->response->set_data( lv_data ).
 
   ENDMETHOD.
@@ -603,4 +637,49 @@ CLASS zcl_swag IMPLEMENTATION.
 * todo, max one importing parameter? apart from path parameters?
 
   ENDMETHOD.
+
+  METHOD handle_response.
+
+    DATA:
+      lo_xstring_to_string TYPE REF TO cl_abap_conv_in_ce,
+      lo_string_to_xstring TYPE REF TO cl_abap_conv_out_ce,
+      lv_data_as_string    TYPE string.
+
+    lo_xstring_to_string = cl_abap_conv_in_ce=>create( input = cv_data ).
+    lo_xstring_to_string->read( IMPORTING data = lv_data_as_string ).
+
+    handle_remove_data_object(
+          EXPORTING
+            is_meta = is_meta
+          CHANGING
+            cv_data_as_string = lv_data_as_string ).
+
+    lo_string_to_xstring = cl_abap_conv_out_ce=>create( ).
+    lo_string_to_xstring->convert(
+      EXPORTING
+          data = lv_data_as_string
+      IMPORTING
+          buffer = cv_data ).
+
+
+  ENDMETHOD.
+
+
+  METHOD handle_remove_data_object.
+
+    DATA lv_length TYPE i.
+    DATA lv_minus_data TYPE i.
+
+    IF is_meta-meta-response_settings-remove_data_object = abap_true.
+
+      lv_length = strlen( cv_data_as_string ).
+      lv_minus_data = lv_length - 9.
+
+      "start has |{"DATA":| (8) end has |}| (1)
+      cv_data_as_string = cv_data_as_string+8(lv_minus_data).
+
+    ENDIF.
+
+  ENDMETHOD.
+
 ENDCLASS.
