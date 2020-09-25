@@ -19,6 +19,26 @@
     "globalMacros": []
   },
   "rules": {
+    "begin_single_include": true,
+    "check_subrc": false,
+    "cyclomatic_complexity": true,
+    "downport": false,
+    "forbidden_pseudo_and_pragma": false,
+    "forbidden_void_type": false,
+    "identical_conditions": true,
+    "identical_contents": true,
+    "line_break_multiple_parameters": false,
+    "line_break_style": false,
+    "many_parenthesis": true,
+    "names_no_dash": true,
+    "parser_missing_space": true,
+    "prefer_inline": false,
+    "prefer_is_not": false,
+    "prefer_xsdbool": false,
+    "reduce_string_templates": true,
+    "unused_types": true,
+    "use_bool_expression": true,
+    "use_line_exists": false,
     "forbidden_identifier": false,
     "try_without_catch": true,
     "unknown_types": false,
@@ -32,6 +52,7 @@
       "endselect": true,
       "execSQL": true,
       "kernelCall": true,
+      "describeLines": true,
       "communication": true,
       "statics": true,
       "systemCall": true,
@@ -50,9 +71,9 @@
     "check_transformation_exists": true,
     "class_attribute_names": {
       "exclude": [],
-      "reason": "",
       "patternKind": "required",
       "ignoreNames": [],
+      "ignoreInterfaces": false,
       "ignorePatterns": [],
       "ignoreExceptions": true,
       "constants": "",
@@ -69,7 +90,6 @@
     "description_empty": true,
     "double_space": {
       "exclude": [],
-      "reason": "",
       "keywords": true,
       "startParen": true,
       "endParen": true,
@@ -77,16 +97,15 @@
     },
     "empty_line_in_statement": {
       "exclude": [],
-      "reason": "",
       "allowChained": false
     },
     "empty_statement": true,
     "empty_structure": {
       "exclude": [],
-      "reason": "",
       "loop": true,
       "if": true,
       "while": true,
+      "try": true,
       "case": true,
       "select": true,
       "do": true,
@@ -94,16 +113,13 @@
     },
     "exit_or_check": true,
     "exporting": true,
-    "form_no_dash": true,
     "form_tables_obsolete": true,
     "fully_type_constants": {
       "exclude": [],
-      "reason": "",
       "checkData": true
     },
     "functional_writing": {
       "exclude": [],
-      "reason": "",
       "ignoreExceptions": true
     },
     "global_class": true,
@@ -112,12 +128,10 @@
     "implement_methods": false,
     "in_statement_indentation": {
       "exclude": [],
-      "reason": "",
       "ignoreExceptions": true
     },
     "indentation": {
       "exclude": [],
-      "reason": "",
       "ignoreExceptions": true,
       "alignTryCatch": false,
       "globalClassSkipFirst": false,
@@ -127,15 +141,14 @@
     "inline_data_old_versions": true,
     "keep_single_parameter_on_one_line": {
       "exclude": [],
-      "reason": "",
       "length": 120
     },
     "keyword_case": {
       "exclude": [],
-      "reason": "",
       "style": "upper",
       "ignoreKeywords": [],
       "ignoreExceptions": true,
+      "ignoreGlobalClassBoundaries": false,
       "ignoreLowerClassImplmentationStatement": true,
       "ignoreGlobalClassDefinition": false,
       "ignoreGlobalInterface": false,
@@ -143,17 +156,14 @@
     },
     "line_length": {
       "exclude": [],
-      "reason": "",
       "length": 120
     },
     "line_only_punc": {
       "exclude": [],
-      "reason": "",
       "ignoreExceptions": true
     },
     "local_class_naming": {
       "exclude": [],
-      "reason": "",
       "patternKind": "required",
       "ignoreNames": [],
       "ignorePatterns": [],
@@ -164,7 +174,6 @@
     "local_testclass_location": true,
     "local_variable_names": {
       "exclude": [],
-      "reason": "",
       "patternKind": "required",
       "ignoreNames": [],
       "ignorePatterns": [],
@@ -177,14 +186,12 @@
     "message_exists": true,
     "method_length": {
       "exclude": [],
-      "reason": "",
       "statements": 160,
       "errorWhenEmpty": true,
       "ignoreTestClasses": false
     },
     "method_parameter_names": {
       "exclude": [],
-      "reason": "",
       "patternKind": "required",
       "ignoreNames": [],
       "ignorePatterns": [],
@@ -198,23 +205,19 @@
     "msag_consistency": true,
     "nesting": {
       "exclude": [],
-      "reason": "",
       "depth": 5
     },
     "newline_between_methods": {
       "exclude": [],
-      "reason": "",
       "count": 3,
       "logic": "less"
     },
     "no_public_attributes": {
       "exclude": [],
-      "reason": "",
       "allowReadOnly": false
     },
     "object_naming": {
       "exclude": [],
-      "reason": "",
       "patternKind": "required",
       "ignoreNames": [],
       "ignorePatterns": [],
@@ -222,6 +225,7 @@
       "intf": "^ZIF\\_",
       "prog": "^Z",
       "fugr": "^Z",
+      "shlp": "^Z",
       "tabl": "^Z",
       "ssfo": "^Z",
       "ssst": "^Z",
@@ -238,11 +242,14 @@
     },
     "obsolete_statement": {
       "exclude": [],
-      "reason": "",
       "refresh": true,
       "compute": true,
+      "fieldSymbolStructure": true,
       "add": true,
+      "withHeaderLine": true,
+      "typePools": true,
       "subtract": true,
+      "load": true,
       "multiply": true,
       "move": true,
       "divide": true,
@@ -254,7 +261,6 @@
     "prefer_returning_to_exporting": true,
     "preferred_compare_operator": {
       "exclude": [],
-      "reason": "",
       "badOperators": [
         "EQ",
         "><",
@@ -267,19 +273,17 @@
     },
     "prefix_is_current_class": {
       "exclude": [],
-      "reason": "",
       "omitMeInstanceCalls": true
     },
     "release_idoc": true,
     "remove_descriptions": {
       "exclude": [],
-      "reason": "",
+      "ignoreWorkflow": false,
       "ignoreExceptions": false
     },
     "rfc_error_handling": true,
     "selection_screen_naming": {
       "exclude": [],
-      "reason": "",
       "patternKind": "required",
       "ignoreNames": [],
       "ignorePatterns": [],
@@ -288,12 +292,10 @@
     },
     "sequential_blank": {
       "exclude": [],
-      "reason": "",
       "lines": 4
     },
     "short_case": {
       "exclude": [],
-      "reason": "",
       "length": 1,
       "allow": []
     },
@@ -301,7 +303,6 @@
     "space_before_colon": true,
     "space_before_dot": {
       "exclude": [],
-      "reason": "",
       "ignoreGlobalDefinition": true,
       "ignoreExceptions": true
     },
@@ -309,11 +310,9 @@
     "start_at_tab": true,
     "superclass_final": true,
     "tabl_enhancement_category": true,
-    "type_begin_single_include": true,
     "type_form_parameters": true,
     "types_naming": {
       "exclude": [],
-      "reason": "",
       "pattern": "^TY_.+$"
     },
     "unreachable_code": true,
