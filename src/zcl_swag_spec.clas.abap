@@ -67,6 +67,8 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
           lv_sep    TYPE string,
           lt_string TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
 
+    SORT mt_definitions.
+    DELETE ADJACENT DUPLICATES FROM mt_definitions.
 
     APPEND '  "definitions":{' TO lt_string.
 
@@ -362,11 +364,11 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
       lv_type = lo_map->map( ).
 
       APPEND '"schema": {' TO lt_string.
-      lv_string = |"$ref": "#/definitions/{ is_meta-meta-handler }_Response"|.
+      lv_string = |"$ref": "#/definitions/{ <ls_parameter>-type }"|.
       APPEND lv_string TO lt_string.
       APPEND '}' TO lt_string.
 
-      lv_string = |"{ is_meta-meta-handler }_Response":\{"type": "object","properties": \{"DATA": \{{ lv_type }\}\}\}|.
+      lv_string = |"{ <ls_parameter>-type }":\{"type": "object","properties": \{"DATA": \{{ lv_type }\}\}\}|.
       APPEND lv_string TO mt_definitions.
     ENDLOOP.
 
