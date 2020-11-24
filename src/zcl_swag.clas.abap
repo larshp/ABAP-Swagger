@@ -1,22 +1,22 @@
-class ZCL_SWAG definition
-  public
-  create public .
+CLASS zcl_swag DEFINITION
+  PUBLIC
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  types:
-    ty_parameters_tt TYPE STANDARD TABLE OF seosubcodf WITH DEFAULT KEY .
-  types:
-    BEGIN OF ty_url,
+    TYPES:
+      ty_parameters_tt TYPE STANDARD TABLE OF seosubcodf WITH DEFAULT KEY .
+    TYPES:
+      BEGIN OF ty_url,
         regex       TYPE string,
         group_names TYPE STANDARD TABLE OF seosconame WITH DEFAULT KEY,
       END OF ty_url .
-  types:
-    BEGIN OF ty_response,
+    TYPES:
+      BEGIN OF ty_response,
         remove_data_object TYPE abap_bool,
       END OF ty_response .
-  types:
-    BEGIN OF ty_meta,
+    TYPES:
+      BEGIN OF ty_meta,
         summary           TYPE string,
         url               TYPE ty_url,
         method            TYPE string,
@@ -24,118 +24,118 @@ public section.
         tags              TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
         response_settings TYPE ty_response,
       END OF ty_meta .
-  types:
-    BEGIN OF ty_meta_internal,
+    TYPES:
+      BEGIN OF ty_meta_internal,
         meta       TYPE ty_meta,
         obj        TYPE REF TO object,
         parameters TYPE ty_parameters_tt,
         classname  TYPE seoclsname,
       END OF ty_meta_internal .
-  types:
-    ty_meta_internal_tt TYPE STANDARD TABLE OF ty_meta_internal WITH DEFAULT KEY .
-  types:
-    ty_meta_tt TYPE STANDARD TABLE OF ty_meta WITH DEFAULT KEY .
-  types:
-    BEGIN OF ty_externaldoc,
+    TYPES:
+      ty_meta_internal_tt TYPE STANDARD TABLE OF ty_meta_internal WITH DEFAULT KEY .
+    TYPES:
+      ty_meta_tt TYPE STANDARD TABLE OF ty_meta WITH DEFAULT KEY .
+    TYPES:
+      BEGIN OF ty_externaldoc,
         description TYPE string,
         url         TYPE string,
       END OF ty_externaldoc .
-  types:
-    BEGIN OF ty_tagdescription,
+    TYPES:
+      BEGIN OF ty_tagdescription,
         tag         TYPE string,
         description TYPE string,
         externaldoc TYPE ty_externaldoc,
       END OF ty_tagdescription .
-  types:
-    ty_tagdescription_tt TYPE STANDARD TABLE OF ty_tagdescription WITH DEFAULT KEY .
+    TYPES:
+      ty_tagdescription_tt TYPE STANDARD TABLE OF ty_tagdescription WITH DEFAULT KEY .
 
-  constants:
-    BEGIN OF c_parm_kind,
+    CONSTANTS:
+      BEGIN OF c_parm_kind,
         importing TYPE seopardecl VALUE '0',
         exporting TYPE seopardecl VALUE '1',
         changing  TYPE seopardecl VALUE '2',
         returning TYPE seopardecl VALUE '3',
       END OF c_parm_kind .
-  constants:
-    BEGIN OF c_method,
+    CONSTANTS:
+      BEGIN OF c_method,
         get    TYPE string VALUE 'GET',
         post   TYPE string VALUE 'POST',
         put    TYPE string VALUE 'PUT',
         delete TYPE string VALUE 'DELETE',
       END OF c_method .
 
-  methods CONSTRUCTOR
-    importing
-      !II_SERVER type ref to IF_HTTP_SERVER
-      !IV_BASE type STRING
-      !IV_SWAGGER_JSON type STRING default '/swagger.json'
-      !IV_SWAGGER_HTML type STRING default '/swagger.html'
-      !IV_TITLE type STRING .
-  methods REGISTER
-    importing
-      !II_HANDLER type ref to ZIF_SWAG_HANDLER .
-  methods RUN
-    raising
-      CX_STATIC_CHECK .
-  methods SET_TAGDESCRIPTION
-    importing
-      !IV_TAG type STRING
-      !IV_DESCRIPTION type STRING
-      !IV_EXTERNALDOC type TY_EXTERNALDOC optional .
-protected section.
+    METHODS constructor
+      IMPORTING
+        !ii_server       TYPE REF TO if_http_server
+        !iv_base         TYPE string
+        !iv_swagger_json TYPE string DEFAULT '/swagger.json'
+        !iv_swagger_html TYPE string DEFAULT '/swagger.html'
+        !iv_title        TYPE string .
+    METHODS register
+      IMPORTING
+        !ii_handler TYPE REF TO zif_swag_handler .
+    METHODS run
+      RAISING
+        cx_static_check .
+    METHODS set_tagdescription
+      IMPORTING
+        !iv_tag         TYPE string
+        !iv_description TYPE string
+        !iv_externaldoc TYPE ty_externaldoc OPTIONAL .
+  PROTECTED SECTION.
 
-  data MV_BASE type STRING .
-  data MI_SERVER type ref to IF_HTTP_SERVER .
-  data MT_META type TY_META_INTERNAL_TT .
-  data MT_TAGDESCRIPTION type TY_TAGDESCRIPTION_TT .
-  data MV_SWAGGER_JSON type STRING .
-  data MV_SWAGGER_HTML type STRING .
-  data MV_TITLE type STRING .
+    DATA mv_base TYPE string .
+    DATA mi_server TYPE REF TO if_http_server .
+    DATA mt_meta TYPE ty_meta_internal_tt .
+    DATA mt_tagdescription TYPE ty_tagdescription_tt .
+    DATA mv_swagger_json TYPE string .
+    DATA mv_swagger_html TYPE string .
+    DATA mv_title TYPE string .
 
-  methods BUILD_PARAMETERS
-    importing
-      !IS_META type TY_META_INTERNAL
-    returning
-      value(RT_PARAMETERS) type ABAP_PARMBIND_TAB .
-  methods CREATE_DATA
-    importing
-      !IS_META type TY_META_INTERNAL
-    returning
-      value(RR_DATA) type ref to DATA .
-  methods FROM_BODY
-    importing
-      !IS_META type TY_META_INTERNAL
-      !IR_REF type ref to DATA .
-  methods FROM_QUERY
-    importing
-      !IS_META type TY_META_INTERNAL
-      !IR_REF type ref to DATA .
-  methods FROM_PATH
-    importing
-      !IS_META type TY_META_INTERNAL
-      !IR_REF type ref to DATA .
-  methods GENERATE_SPEC
-    importing
-      !IV_TITLE type CLIKE
-      !IV_DESCRIPTION type CLIKE .
-  methods GENERATE_UI
-    importing
-      !IV_JSON_URL type STRING
-      !IV_DIST type STRING default ''
-      !IV_TITLE type CLIKE default ''
-    returning
-      value(RV_UI) type STRING .
-  methods JSON_REPLY
-    importing
-      !IS_META type TY_META_INTERNAL
-      !IT_PARAMETERS type ABAP_PARMBIND_TAB .
-  methods TEXT_REPLY
-    importing
-      !IS_META type TY_META_INTERNAL
-      !IT_PARAMETERS type ABAP_PARMBIND_TAB .
-  methods VALIDATE_PARAMETERS
-    importing
-      !IT_PARAMETERS type TY_PARAMETERS_TT .
+    METHODS build_parameters
+      IMPORTING
+        !is_meta             TYPE ty_meta_internal
+      RETURNING
+        VALUE(rt_parameters) TYPE abap_parmbind_tab .
+    METHODS create_data
+      IMPORTING
+        !is_meta       TYPE ty_meta_internal
+      RETURNING
+        VALUE(rr_data) TYPE REF TO data .
+    METHODS from_body
+      IMPORTING
+        !is_meta TYPE ty_meta_internal
+        !ir_ref  TYPE REF TO data .
+    METHODS from_query
+      IMPORTING
+        !is_meta TYPE ty_meta_internal
+        !ir_ref  TYPE REF TO data .
+    METHODS from_path
+      IMPORTING
+        !is_meta TYPE ty_meta_internal
+        !ir_ref  TYPE REF TO data .
+    METHODS generate_spec
+      IMPORTING
+        !iv_title       TYPE clike
+        !iv_description TYPE clike .
+    METHODS generate_ui
+      IMPORTING
+        !iv_json_url TYPE string
+        !iv_dist     TYPE string DEFAULT ''
+        !iv_title    TYPE clike DEFAULT ''
+      RETURNING
+        VALUE(rv_ui) TYPE string .
+    METHODS json_reply
+      IMPORTING
+        !is_meta       TYPE ty_meta_internal
+        !it_parameters TYPE abap_parmbind_tab .
+    METHODS text_reply
+      IMPORTING
+        !is_meta       TYPE ty_meta_internal
+        !it_parameters TYPE abap_parmbind_tab .
+    METHODS validate_parameters
+      IMPORTING
+        !it_parameters TYPE ty_parameters_tt .
   PRIVATE SECTION.
     METHODS handle_response
       IMPORTING

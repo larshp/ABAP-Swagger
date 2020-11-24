@@ -1,53 +1,53 @@
-class ZCL_SWAG_SPEC definition
-  public
-  create public .
+CLASS zcl_swag_spec DEFINITION
+  PUBLIC
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  methods CONSTRUCTOR
-    importing
-      !IV_TITLE type CLIKE
-      !IV_DESCRIPTION type CLIKE
-      !IT_META type ZCL_SWAG=>TY_META_INTERNAL_TT
-      !IV_BASE type CLIKE
-      !IT_TAGDESCRIPTION type ZCL_SWAG=>TY_TAGDESCRIPTION_TT .
-  methods GENERATE
-    returning
-      value(RV_SPEC) type STRING .
-protected section.
+    METHODS constructor
+      IMPORTING
+        !iv_title          TYPE clike
+        !iv_description    TYPE clike
+        !it_meta           TYPE zcl_swag=>ty_meta_internal_tt
+        !iv_base           TYPE clike
+        !it_tagdescription TYPE zcl_swag=>ty_tagdescription_tt .
+    METHODS generate
+      RETURNING
+        VALUE(rv_spec) TYPE string .
+  PROTECTED SECTION.
 
-  data MV_TITLE type STRING .
-  data MV_DESCRIPTION type STRING .
-  data MT_META type ZCL_SWAG=>TY_META_INTERNAL_TT .
-  data MV_BASE type STRING .
-  data MT_DEFINITIONS type STRING_TABLE .
-  data MT_TAGDESCRIPTION type ZCL_SWAG=>TY_TAGDESCRIPTION_TT .
+    DATA mv_title TYPE string .
+    DATA mv_description TYPE string .
+    DATA mt_meta TYPE zcl_swag=>ty_meta_internal_tt .
+    DATA mv_base TYPE string .
+    DATA mt_definitions TYPE string_table .
+    DATA mt_tagdescription TYPE zcl_swag=>ty_tagdescription_tt .
 
-  methods REQUEST
-    importing
-      !IS_META type ZCL_SWAG=>TY_META_INTERNAL
-      !IS_PARAMETER type SEOSUBCODF .
-  methods DEFINITIONS
-    returning
-      value(RV_DEFS) type STRING .
-  methods PATH
-    importing
-      !IS_META type ZCL_SWAG=>TY_META_INTERNAL
-    returning
-      value(RV_PATH) type STRING .
-  methods PARAMETERS
-    importing
-      !IS_META type ZCL_SWAG=>TY_META_INTERNAL
-    returning
-      value(RV_PARAMETERS) type STRING .
-  methods RESPONSE
-    importing
-      !IS_META type ZCL_SWAG=>TY_META_INTERNAL
-    returning
-      value(RV_RESPONSE) type STRING .
-  methods TAGDESCRIPTIONS
-    returning
-      value(RV_DEFS) type STRING .
+    METHODS request
+      IMPORTING
+        !is_meta      TYPE zcl_swag=>ty_meta_internal
+        !is_parameter TYPE seosubcodf .
+    METHODS definitions
+      RETURNING
+        VALUE(rv_defs) TYPE string .
+    METHODS path
+      IMPORTING
+        !is_meta       TYPE zcl_swag=>ty_meta_internal
+      RETURNING
+        VALUE(rv_path) TYPE string .
+    METHODS parameters
+      IMPORTING
+        !is_meta             TYPE zcl_swag=>ty_meta_internal
+      RETURNING
+        VALUE(rv_parameters) TYPE string .
+    METHODS response
+      IMPORTING
+        !is_meta           TYPE zcl_swag=>ty_meta_internal
+      RETURNING
+        VALUE(rv_response) TYPE string .
+    METHODS tagdescriptions
+      RETURNING
+        VALUE(rv_defs) TYPE string .
   PRIVATE SECTION.
 ENDCLASS.
 
