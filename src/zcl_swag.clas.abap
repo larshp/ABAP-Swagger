@@ -1,30 +1,22 @@
-CLASS zcl_swag DEFINITION
-  PUBLIC
-  CREATE PUBLIC .
+class ZCL_SWAG definition
+  public
+  create public .
 
-  PUBLIC SECTION.
+public section.
 
-    CONSTANTS:
-      BEGIN OF c_parm_kind,
-        importing TYPE seopardecl VALUE '0',
-        exporting TYPE seopardecl VALUE '1',
-        changing  TYPE seopardecl VALUE '2',
-        returning TYPE seopardecl VALUE '3',
-      END OF c_parm_kind .
-
-    TYPES:
-      ty_parameters_tt TYPE STANDARD TABLE OF seosubcodf WITH DEFAULT KEY .
-    TYPES:
-      BEGIN OF ty_url,
+  types:
+    ty_parameters_tt TYPE STANDARD TABLE OF seosubcodf WITH DEFAULT KEY .
+  types:
+    BEGIN OF ty_url,
         regex       TYPE string,
         group_names TYPE STANDARD TABLE OF seosconame WITH DEFAULT KEY,
       END OF ty_url .
-    TYPES:
-      BEGIN OF ty_response,
+  types:
+    BEGIN OF ty_response,
         remove_data_object TYPE abap_bool,
-      END OF ty_response.
-    TYPES:
-      BEGIN OF ty_meta,
+      END OF ty_response .
+  types:
+    BEGIN OF ty_meta,
         summary           TYPE string,
         url               TYPE ty_url,
         method            TYPE string,
@@ -32,92 +24,115 @@ CLASS zcl_swag DEFINITION
         tags              TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
         response_settings TYPE ty_response,
       END OF ty_meta .
-    TYPES:
-      BEGIN OF ty_meta_internal,
+  types:
+    BEGIN OF ty_meta_internal,
         meta       TYPE ty_meta,
         obj        TYPE REF TO object,
         parameters TYPE ty_parameters_tt,
         classname  TYPE seoclsname,
       END OF ty_meta_internal .
-    TYPES:
-      ty_meta_internal_tt TYPE STANDARD TABLE OF ty_meta_internal WITH DEFAULT KEY .
-    TYPES:
-      ty_meta_tt TYPE STANDARD TABLE OF ty_meta WITH DEFAULT KEY .
+  types:
+    ty_meta_internal_tt TYPE STANDARD TABLE OF ty_meta_internal WITH DEFAULT KEY .
+  types:
+    ty_meta_tt TYPE STANDARD TABLE OF ty_meta WITH DEFAULT KEY .
+  types:
+    BEGIN OF ty_tagdescription,
+        tag               TYPE string,
+        description       TYPE string,
+        externaldocsdescr TYPE string,
+        externaldocsurl   TYPE string,
+      END OF ty_tagdescription .
+  types:
+    ty_tagdescription_tt TYPE STANDARD TABLE OF ty_tagdescription WITH DEFAULT KEY .
 
-    CONSTANTS:
-      BEGIN OF c_method,
+  constants:
+    BEGIN OF c_parm_kind,
+        importing TYPE seopardecl VALUE '0',
+        exporting TYPE seopardecl VALUE '1',
+        changing  TYPE seopardecl VALUE '2',
+        returning TYPE seopardecl VALUE '3',
+      END OF c_parm_kind .
+  constants:
+    BEGIN OF c_method,
         get    TYPE string VALUE 'GET',
         post   TYPE string VALUE 'POST',
         put    TYPE string VALUE 'PUT',
         delete TYPE string VALUE 'DELETE',
       END OF c_method .
 
-    METHODS constructor
-      IMPORTING
-        !ii_server       TYPE REF TO if_http_server
-        !iv_base         TYPE string
-        !iv_swagger_json TYPE string DEFAULT '/swagger.json'
-        !iv_swagger_html TYPE string DEFAULT '/swagger.html'
-        !iv_title        TYPE string .
-    METHODS register
-      IMPORTING
-        !ii_handler TYPE REF TO zif_swag_handler .
-    METHODS run
-      RAISING
-        cx_static_check .
-  PROTECTED SECTION.
+  methods CONSTRUCTOR
+    importing
+      !II_SERVER type ref to IF_HTTP_SERVER
+      !IV_BASE type STRING
+      !IV_SWAGGER_JSON type STRING default '/swagger.json'
+      !IV_SWAGGER_HTML type STRING default '/swagger.html'
+      !IV_TITLE type STRING .
+  methods REGISTER
+    importing
+      !II_HANDLER type ref to ZIF_SWAG_HANDLER .
+  methods RUN
+    raising
+      CX_STATIC_CHECK .
+  methods SET_TAGDESCRIPTION
+    importing
+      !IV_TAG type STRING
+      !IV_DESCRIPTION type STRING
+      !IV_EXTERNALDOCSDESCR type STRING optional
+      !IV_EXTERNALDOCSURL type STRING optional .
+protected section.
 
-    DATA mv_base TYPE string .
-    DATA mi_server TYPE REF TO if_http_server .
-    DATA mt_meta TYPE ty_meta_internal_tt .
-    DATA mv_swagger_json TYPE string .
-    DATA mv_swagger_html TYPE string .
-    DATA mv_title TYPE string .
+  data MV_BASE type STRING .
+  data MI_SERVER type ref to IF_HTTP_SERVER .
+  data MT_META type TY_META_INTERNAL_TT .
+  data MT_TAGDESCRIPTION type TY_TAGDESCRIPTION_TT .
+  data MV_SWAGGER_JSON type STRING .
+  data MV_SWAGGER_HTML type STRING .
+  data MV_TITLE type STRING .
 
-    METHODS build_parameters
-      IMPORTING
-        !is_meta             TYPE ty_meta_internal
-      RETURNING
-        VALUE(rt_parameters) TYPE abap_parmbind_tab .
-    METHODS create_data
-      IMPORTING
-        !is_meta       TYPE ty_meta_internal
-      RETURNING
-        VALUE(rr_data) TYPE REF TO data .
-    METHODS from_body
-      IMPORTING
-        !is_meta TYPE ty_meta_internal
-        !ir_ref  TYPE REF TO data .
-    METHODS from_query
-      IMPORTING
-        !is_meta TYPE ty_meta_internal
-        !ir_ref  TYPE REF TO data .
-    METHODS from_path
-      IMPORTING
-        !is_meta TYPE ty_meta_internal
-        !ir_ref  TYPE REF TO data .
-    METHODS generate_spec
-      IMPORTING
-        !iv_title       TYPE clike
-        !iv_description TYPE clike .
-    METHODS generate_ui
-      IMPORTING
-        !iv_json_url TYPE string
-        !iv_dist     TYPE string DEFAULT ''
-        !iv_title    TYPE clike DEFAULT ''
-      RETURNING
-        VALUE(rv_ui) TYPE string .
-    METHODS json_reply
-      IMPORTING
-        !is_meta       TYPE ty_meta_internal
-        !it_parameters TYPE abap_parmbind_tab .
-    METHODS text_reply
-      IMPORTING
-        !is_meta       TYPE ty_meta_internal
-        !it_parameters TYPE abap_parmbind_tab .
-    METHODS validate_parameters
-      IMPORTING
-        !it_parameters TYPE ty_parameters_tt .
+  methods BUILD_PARAMETERS
+    importing
+      !IS_META type TY_META_INTERNAL
+    returning
+      value(RT_PARAMETERS) type ABAP_PARMBIND_TAB .
+  methods CREATE_DATA
+    importing
+      !IS_META type TY_META_INTERNAL
+    returning
+      value(RR_DATA) type ref to DATA .
+  methods FROM_BODY
+    importing
+      !IS_META type TY_META_INTERNAL
+      !IR_REF type ref to DATA .
+  methods FROM_QUERY
+    importing
+      !IS_META type TY_META_INTERNAL
+      !IR_REF type ref to DATA .
+  methods FROM_PATH
+    importing
+      !IS_META type TY_META_INTERNAL
+      !IR_REF type ref to DATA .
+  methods GENERATE_SPEC
+    importing
+      !IV_TITLE type CLIKE
+      !IV_DESCRIPTION type CLIKE .
+  methods GENERATE_UI
+    importing
+      !IV_JSON_URL type STRING
+      !IV_DIST type STRING default ''
+      !IV_TITLE type CLIKE default ''
+    returning
+      value(RV_UI) type STRING .
+  methods JSON_REPLY
+    importing
+      !IS_META type TY_META_INTERNAL
+      !IT_PARAMETERS type ABAP_PARMBIND_TAB .
+  methods TEXT_REPLY
+    importing
+      !IS_META type TY_META_INTERNAL
+      !IT_PARAMETERS type ABAP_PARMBIND_TAB .
+  methods VALIDATE_PARAMETERS
+    importing
+      !IT_PARAMETERS type TY_PARAMETERS_TT .
   PRIVATE SECTION.
     METHODS handle_response
       IMPORTING
@@ -144,7 +159,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_swag IMPLEMENTATION.
+CLASS ZCL_SWAG IMPLEMENTATION.
 
 
   METHOD build_parameters.
@@ -353,10 +368,11 @@ CLASS zcl_swag IMPLEMENTATION.
 
     CREATE OBJECT lo_spec
       EXPORTING
-        iv_title       = iv_title
-        iv_description = iv_description
-        it_meta        = mt_meta
-        iv_base        = mv_base.
+        iv_title          = iv_title
+        iv_description    = iv_description
+        it_meta           = mt_meta
+        iv_base           = mv_base
+        it_tagdescription = mt_tagdescription.
 
     lv_spec = lo_spec->generate( ).
 
@@ -434,6 +450,51 @@ CLASS zcl_swag IMPLEMENTATION.
 
     mi_server->response->set_cdata( rv_ui ).
     mi_server->response->set_status( code = 200 reason = '200' ).
+
+  ENDMETHOD.
+
+
+  METHOD handle_remove_data_object.
+
+    DATA lv_length TYPE i.
+    DATA lv_minus_data TYPE i.
+
+    IF is_meta-meta-response_settings-remove_data_object = abap_true.
+
+      lv_length = strlen( cv_data_as_string ).
+      lv_minus_data = lv_length - 9.
+
+      "start has |{"DATA":| (8) end has |}| (1)
+      cv_data_as_string = cv_data_as_string+8(lv_minus_data).
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD handle_response.
+
+    DATA:
+      lo_xstring_to_string TYPE REF TO cl_abap_conv_in_ce,
+      lo_string_to_xstring TYPE REF TO cl_abap_conv_out_ce,
+      lv_data_as_string    TYPE string.
+
+    lo_xstring_to_string = cl_abap_conv_in_ce=>create( input = cv_data ).
+    lo_xstring_to_string->read( IMPORTING data = lv_data_as_string ).
+
+    handle_remove_data_object(
+          EXPORTING
+            is_meta = is_meta
+          CHANGING
+            cv_data_as_string = lv_data_as_string ).
+
+    lo_string_to_xstring = cl_abap_conv_out_ce=>create( ).
+    lo_string_to_xstring->convert(
+      EXPORTING
+          data = lv_data_as_string
+      IMPORTING
+          buffer = cv_data ).
+
 
   ENDMETHOD.
 
@@ -593,6 +654,17 @@ CLASS zcl_swag IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD set_tagdescription.
+
+    APPEND INITIAL LINE TO mt_tagdescription ASSIGNING FIELD-SYMBOL(<tagdescription>).
+    <tagdescription>-tag = iv_tag.
+    <tagdescription>-description = iv_description.
+    <tagdescription>-externaldocsdescr = iv_externaldocsdescr.
+    <tagdescription>-externaldocsurl = iv_externaldocsurl.
+
+  ENDMETHOD.
+
+
   METHOD text_reply.
 
     FIELD-SYMBOLS: <lg_any>       TYPE any,
@@ -637,49 +709,4 @@ CLASS zcl_swag IMPLEMENTATION.
 * todo, max one importing parameter? apart from path parameters?
 
   ENDMETHOD.
-
-  METHOD handle_response.
-
-    DATA:
-      lo_xstring_to_string TYPE REF TO cl_abap_conv_in_ce,
-      lo_string_to_xstring TYPE REF TO cl_abap_conv_out_ce,
-      lv_data_as_string    TYPE string.
-
-    lo_xstring_to_string = cl_abap_conv_in_ce=>create( input = cv_data ).
-    lo_xstring_to_string->read( IMPORTING data = lv_data_as_string ).
-
-    handle_remove_data_object(
-          EXPORTING
-            is_meta = is_meta
-          CHANGING
-            cv_data_as_string = lv_data_as_string ).
-
-    lo_string_to_xstring = cl_abap_conv_out_ce=>create( ).
-    lo_string_to_xstring->convert(
-      EXPORTING
-          data = lv_data_as_string
-      IMPORTING
-          buffer = cv_data ).
-
-
-  ENDMETHOD.
-
-
-  METHOD handle_remove_data_object.
-
-    DATA lv_length TYPE i.
-    DATA lv_minus_data TYPE i.
-
-    IF is_meta-meta-response_settings-remove_data_object = abap_true.
-
-      lv_length = strlen( cv_data_as_string ).
-      lv_minus_data = lv_length - 9.
-
-      "start has |{"DATA":| (8) end has |}| (1)
-      cv_data_as_string = cv_data_as_string+8(lv_minus_data).
-
-    ENDIF.
-
-  ENDMETHOD.
-
 ENDCLASS.

@@ -1,48 +1,53 @@
-CLASS zcl_swag_spec DEFINITION
-  PUBLIC
-  CREATE PUBLIC .
+class ZCL_SWAG_SPEC definition
+  public
+  create public .
 
-  PUBLIC SECTION.
+public section.
 
-    METHODS constructor
-      IMPORTING
-        !iv_title       TYPE clike
-        !iv_description TYPE clike
-        !it_meta        TYPE zcl_swag=>ty_meta_internal_tt
-        !iv_base        TYPE clike .
-    METHODS generate
-      RETURNING
-        VALUE(rv_spec) TYPE string .
-  PROTECTED SECTION.
+  methods CONSTRUCTOR
+    importing
+      !IV_TITLE type CLIKE
+      !IV_DESCRIPTION type CLIKE
+      !IT_META type ZCL_SWAG=>TY_META_INTERNAL_TT
+      !IV_BASE type CLIKE
+      !IT_TAGDESCRIPTION type ZCL_SWAG=>TY_TAGDESCRIPTION_TT .
+  methods GENERATE
+    returning
+      value(RV_SPEC) type STRING .
+protected section.
 
-    DATA mv_title TYPE string .
-    DATA mv_description TYPE string .
-    DATA mt_meta TYPE zcl_swag=>ty_meta_internal_tt .
-    DATA mv_base TYPE string .
-    DATA mt_definitions TYPE string_table .
+  data MV_TITLE type STRING .
+  data MV_DESCRIPTION type STRING .
+  data MT_META type ZCL_SWAG=>TY_META_INTERNAL_TT .
+  data MV_BASE type STRING .
+  data MT_DEFINITIONS type STRING_TABLE .
+  data MT_TAGDESCRIPTION type ZCL_SWAG=>TY_TAGDESCRIPTION_TT .
 
-    METHODS request
-      IMPORTING
-        !is_meta      TYPE zcl_swag=>ty_meta_internal
-        !is_parameter TYPE seosubcodf .
-    METHODS definitions
-      RETURNING
-        VALUE(rv_defs) TYPE string .
-    METHODS path
-      IMPORTING
-        !is_meta       TYPE zcl_swag=>ty_meta_internal
-      RETURNING
-        VALUE(rv_path) TYPE string .
-    METHODS parameters
-      IMPORTING
-        !is_meta             TYPE zcl_swag=>ty_meta_internal
-      RETURNING
-        VALUE(rv_parameters) TYPE string .
-    METHODS response
-      IMPORTING
-        !is_meta           TYPE zcl_swag=>ty_meta_internal
-      RETURNING
-        VALUE(rv_response) TYPE string .
+  methods REQUEST
+    importing
+      !IS_META type ZCL_SWAG=>TY_META_INTERNAL
+      !IS_PARAMETER type SEOSUBCODF .
+  methods DEFINITIONS
+    returning
+      value(RV_DEFS) type STRING .
+  methods PATH
+    importing
+      !IS_META type ZCL_SWAG=>TY_META_INTERNAL
+    returning
+      value(RV_PATH) type STRING .
+  methods PARAMETERS
+    importing
+      !IS_META type ZCL_SWAG=>TY_META_INTERNAL
+    returning
+      value(RV_PARAMETERS) type STRING .
+  methods RESPONSE
+    importing
+      !IS_META type ZCL_SWAG=>TY_META_INTERNAL
+    returning
+      value(RV_RESPONSE) type STRING .
+  methods TAGDESCRIPTIONS
+    returning
+      value(RV_DEFS) type STRING .
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -57,6 +62,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
     mv_description = iv_description.
     mt_meta        = it_meta.
     mv_base        = iv_base.
+    mt_tagdescription = it_tagdescription.
 
   ENDMETHOD.
 
@@ -219,6 +225,9 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
 
     _add '  },'.
 
+    lv_add = tagdescriptions( ).
+    _add lv_add.
+
     lv_add = definitions( ).
     _add lv_add.
 
@@ -376,6 +385,47 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
 
     CONCATENATE LINES OF lt_string INTO rv_response
       SEPARATED BY cl_abap_char_utilities=>newline.
+
+  ENDMETHOD.
+
+
+  METHOD tagdescriptions.
+
+    DATA: lv_string TYPE string,
+          lv_sep    TYPE string,
+          lt_string TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+    FIELD-SYMBOLS: <tagdescription> LIKE LINE OF mt_tagdescription.
+
+
+    IF mt_tagdescription IS NOT INITIAL.
+
+      APPEND '  "tags": [ {' TO lt_string.
+
+      LOOP AT mt_tagdescription ASSIGNING <tagdescription>.
+        CONCATENATE '"name":"' <tagdescription>-tag '",' INTO lv_string.
+        APPEND lv_string TO lt_string.
+        CONCATENATE '"description":"' <tagdescription>-description '"' INTO lv_string.
+        APPEND lv_string TO lt_string.
+        APPEND ',' TO lt_string.
+        IF <tagdescription>-externaldocsdescr IS NOT INITIAL.
+          CONCATENATE '"externalDocs": { "description":"' <tagdescription>-externaldocsdescr '",' INTO lv_string.
+          APPEND lv_string TO lt_string.
+          CONCATENATE '"url":"' <tagdescription>-externaldocsurl '" }' INTO lv_string.
+          APPEND lv_string TO lt_string.
+          APPEND ',' TO lt_string.
+        ENDIF.
+      ENDLOOP.
+      IF sy-subrc = 0.
+* fix the comma
+        DELETE lt_string INDEX lines( lt_string ).
+        APPEND '} ],' TO lt_string.
+      ENDIF.
+
+      CONCATENATE LINES OF lt_string INTO rv_defs
+        SEPARATED BY cl_abap_char_utilities=>newline.
+
+    ENDIF.
 
   ENDMETHOD.
 ENDCLASS.
