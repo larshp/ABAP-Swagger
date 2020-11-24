@@ -36,11 +36,15 @@ public section.
   types:
     ty_meta_tt TYPE STANDARD TABLE OF ty_meta WITH DEFAULT KEY .
   types:
+    BEGIN OF ty_externaldoc,
+        description TYPE string,
+        url         TYPE string,
+      END OF ty_externaldoc .
+  types:
     BEGIN OF ty_tagdescription,
-        tag               TYPE string,
-        description       TYPE string,
-        externaldocsdescr TYPE string,
-        externaldocsurl   TYPE string,
+        tag         TYPE string,
+        description TYPE string,
+        externaldoc TYPE ty_externaldoc,
       END OF ty_tagdescription .
   types:
     ty_tagdescription_tt TYPE STANDARD TABLE OF ty_tagdescription WITH DEFAULT KEY .
@@ -77,8 +81,7 @@ public section.
     importing
       !IV_TAG type STRING
       !IV_DESCRIPTION type STRING
-      !IV_EXTERNALDOCSDESCR type STRING optional
-      !IV_EXTERNALDOCSURL type STRING optional .
+      !IV_EXTERNALDOC type TY_EXTERNALDOC optional .
 protected section.
 
   data MV_BASE type STRING .
@@ -659,8 +662,8 @@ CLASS ZCL_SWAG IMPLEMENTATION.
     APPEND INITIAL LINE TO mt_tagdescription ASSIGNING FIELD-SYMBOL(<tagdescription>).
     <tagdescription>-tag = iv_tag.
     <tagdescription>-description = iv_description.
-    <tagdescription>-externaldocsdescr = iv_externaldocsdescr.
-    <tagdescription>-externaldocsurl = iv_externaldocsurl.
+    <tagdescription>-externaldoc-description = iv_externaldoc-description.
+    <tagdescription>-externaldoc-url = iv_externaldoc-url.
 
   ENDMETHOD.
 

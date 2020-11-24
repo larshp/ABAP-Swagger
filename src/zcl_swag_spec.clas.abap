@@ -408,10 +408,10 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
         CONCATENATE '"description":"' <tagdescription>-description '"' INTO lv_string.
         APPEND lv_string TO lt_string.
         APPEND ',' TO lt_string.
-        IF <tagdescription>-externaldocsdescr IS NOT INITIAL.
-          CONCATENATE '"externalDocs": { "description":"' <tagdescription>-externaldocsdescr '",' INTO lv_string.
+        IF <tagdescription>-externaldoc IS NOT INITIAL.
+          CONCATENATE '"externalDocs": { "description":"' <tagdescription>-externaldoc-description '",' INTO lv_string.
           APPEND lv_string TO lt_string.
-          CONCATENATE '"url":"' <tagdescription>-externaldocsurl '" }' INTO lv_string.
+          CONCATENATE '"url":"' <tagdescription>-externaldoc-url '" }' INTO lv_string.
           APPEND lv_string TO lt_string.
           APPEND ',' TO lt_string.
         ENDIF.
