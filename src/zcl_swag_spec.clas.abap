@@ -400,9 +400,10 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
 
     IF mt_tagdescription IS NOT INITIAL.
 
-      APPEND '  "tags": [ {' TO lt_string.
+      APPEND '  "tags": [' TO lt_string.
 
       LOOP AT mt_tagdescription ASSIGNING <ls_tagdescription>.
+        APPEND '{' TO lt_string.
         CONCATENATE '"name":"' <ls_tagdescription>-tag '",' INTO lv_string.
         APPEND lv_string TO lt_string.
         CONCATENATE '"description":"' <ls_tagdescription>-description '"' INTO lv_string.
@@ -414,13 +415,14 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
           APPEND lv_string TO lt_string.
           CONCATENATE '"url":"' <ls_tagdescription>-externaldoc-url '" }' INTO lv_string.
           APPEND lv_string TO lt_string.
+          APPEND '}' TO lt_string.
           APPEND ',' TO lt_string.
         ENDIF.
       ENDLOOP.
       IF sy-subrc = 0.
 * fix the comma
         DELETE lt_string INDEX lines( lt_string ).
-        APPEND '} ],' TO lt_string.
+        APPEND '],' TO lt_string.
       ENDIF.
 
       CONCATENATE LINES OF lt_string INTO rv_defs
