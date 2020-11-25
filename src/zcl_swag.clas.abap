@@ -1,22 +1,22 @@
-class ZCL_SWAG definition
-  public
-  create public .
+CLASS zcl_swag DEFINITION
+  PUBLIC
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  types:
-    ty_parameters_tt TYPE STANDARD TABLE OF seosubcodf WITH DEFAULT KEY .
-  types:
-    BEGIN OF ty_url,
+    TYPES:
+      ty_parameters_tt TYPE STANDARD TABLE OF seosubcodf WITH DEFAULT KEY .
+    TYPES:
+      BEGIN OF ty_url,
         regex       TYPE string,
         group_names TYPE STANDARD TABLE OF seosconame WITH DEFAULT KEY,
       END OF ty_url .
-  types:
-    BEGIN OF ty_response,
+    TYPES:
+      BEGIN OF ty_response,
         remove_data_object TYPE abap_bool,
       END OF ty_response .
-  types:
-    BEGIN OF ty_meta,
+    TYPES:
+      BEGIN OF ty_meta,
         summary           TYPE string,
         url               TYPE ty_url,
         method            TYPE string,
@@ -24,62 +24,62 @@ public section.
         tags              TYPE STANDARD TABLE OF string WITH DEFAULT KEY,
         response_settings TYPE ty_response,
       END OF ty_meta .
-  types:
-    BEGIN OF ty_meta_internal,
+    TYPES:
+      BEGIN OF ty_meta_internal,
         meta       TYPE ty_meta,
         obj        TYPE REF TO object,
         parameters TYPE ty_parameters_tt,
         classname  TYPE seoclsname,
       END OF ty_meta_internal .
-  types:
-    ty_meta_internal_tt TYPE STANDARD TABLE OF ty_meta_internal WITH DEFAULT KEY .
-  types:
-    ty_meta_tt TYPE STANDARD TABLE OF ty_meta WITH DEFAULT KEY .
-  types:
-    BEGIN OF ty_externaldoc,
+    TYPES:
+      ty_meta_internal_tt TYPE STANDARD TABLE OF ty_meta_internal WITH DEFAULT KEY .
+    TYPES:
+      ty_meta_tt TYPE STANDARD TABLE OF ty_meta WITH DEFAULT KEY .
+    TYPES:
+      BEGIN OF ty_externaldoc,
         description TYPE string,
         url         TYPE string,
       END OF ty_externaldoc .
-  types:
-    BEGIN OF ty_tagdescription,
+    TYPES:
+      BEGIN OF ty_tagdescription,
         tag         TYPE string,
         description TYPE string,
         externaldoc TYPE ty_externaldoc,
       END OF ty_tagdescription .
-  types:
-    ty_tagdescription_tt TYPE STANDARD TABLE OF ty_tagdescription WITH DEFAULT KEY .
+    TYPES:
+      ty_tagdescription_tt TYPE STANDARD TABLE OF ty_tagdescription WITH DEFAULT KEY .
 
-  constants:
-    BEGIN OF c_parm_kind,
+    CONSTANTS:
+      BEGIN OF c_parm_kind,
         importing TYPE seopardecl VALUE '0',
         exporting TYPE seopardecl VALUE '1',
         changing  TYPE seopardecl VALUE '2',
         returning TYPE seopardecl VALUE '3',
       END OF c_parm_kind .
-  constants:
-    BEGIN OF c_method,
+    CONSTANTS:
+      BEGIN OF c_method,
         get    TYPE string VALUE 'GET',
         post   TYPE string VALUE 'POST',
         put    TYPE string VALUE 'PUT',
         delete TYPE string VALUE 'DELETE',
       END OF c_method .
 
-  methods CONSTRUCTOR
-    importing
-      !II_SERVER type ref to IF_HTTP_SERVER
-      !IV_BASE type STRING
-      !IV_SWAGGER_JSON type STRING default '/swagger.json'
-      !IV_SWAGGER_HTML type STRING default '/swagger.html'
-      !IV_TITLE type STRING .
-  methods REGISTER
-    importing
-      !II_HANDLER type ref to ZIF_SWAG_HANDLER .
-  methods RUN
-    raising
-      CX_STATIC_CHECK .
-  methods SET_TAGDESCRIPTION
-    importing
-      !IS_DESCRIPTION type TY_TAGDESCRIPTION .
+    METHODS constructor
+      IMPORTING
+        !ii_server       TYPE REF TO if_http_server
+        !iv_base         TYPE string
+        !iv_swagger_json TYPE string DEFAULT '/swagger.json'
+        !iv_swagger_html TYPE string DEFAULT '/swagger.html'
+        !iv_title        TYPE string .
+    METHODS register
+      IMPORTING
+        !ii_handler TYPE REF TO zif_swag_handler .
+    METHODS run
+      RAISING
+        cx_static_check .
+    METHODS set_tagdescription
+      IMPORTING
+        !is_description TYPE ty_tagdescription .
   PROTECTED SECTION.
 
     DATA mv_base TYPE string .
