@@ -657,11 +657,7 @@ CLASS ZCL_SWAG IMPLEMENTATION.
 
   METHOD set_tagdescription.
 
-    APPEND INITIAL LINE TO mt_tagdescription ASSIGNING FIELD-SYMBOL(<ls_tagdescription>).
-    <ls_tagdescription>-tag = is_description-tag.
-    <ls_tagdescription>-description = is_description-description.
-    <ls_tagdescription>-externaldoc-description = is_description-externaldoc-description.
-    <ls_tagdescription>-externaldoc-url = is_description-externaldoc-url.
+    APPEND is_description TO mt_tagdescription.
 
   ENDMETHOD.
 
