@@ -93,8 +93,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
   METHOD generate.
 
     DEFINE _add.
-      CONCATENATE rv_spec &1 cl_abap_char_utilities=>newline
-        INTO rv_spec ##NO_TEXT.
+      CONCATENATE rv_spec &1 cl_abap_char_utilities=>newline INTO rv_spec ##NO_TEXT.
     END-OF-DEFINITION.
 
     TYPES: BEGIN OF ty_path,
