@@ -93,7 +93,8 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
   METHOD generate.
 
     DEFINE _add.
-      CONCATENATE rv_spec &1 cl_abap_char_utilities=>newline INTO rv_spec ##NO_TEXT.
+      CONCATENATE rv_spec &1 cl_abap_char_utilities=>newline
+         INTO rv_spec ##NO_TEXT.
     END-OF-DEFINITION.
 
     TYPES: BEGIN OF ty_path,
@@ -110,7 +111,6 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
 
     FIELD-SYMBOLS: <ls_path> LIKE LINE OF lt_paths,
                    <ls_meta> LIKE LINE OF mt_meta.
-
 
 * handle path with multiple handlers(ie. GET and POST)
     LOOP AT mt_meta ASSIGNING <ls_meta>.
@@ -221,15 +221,11 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
         _add ','.
       ENDIF.
     ENDLOOP.
-
     _add '  },'.
-
     lv_add = tagdescriptions( ).
     _add lv_add.
-
     lv_add = definitions( ).
     _add lv_add.
-
     _add '}'.
 
   ENDMETHOD.
