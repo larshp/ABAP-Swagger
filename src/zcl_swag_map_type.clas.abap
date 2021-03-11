@@ -4,7 +4,7 @@ class ZCL_SWAG_MAP_TYPE definition
 
   public section.
 
-  constants TYPEKIND_INT8 type ABAP_TYPEKIND value '8' ##NO_TEXT.
+    constants TYPEKIND_INT8 type ABAP_TYPEKIND value '8' ##NO_TEXT.
 
   class-methods GET_TYPEDESCR
     importing
