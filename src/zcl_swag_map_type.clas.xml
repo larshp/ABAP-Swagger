@@ -12,6 +12,14 @@
     <UNICODE>X</UNICODE>
     <WITH_UNIT_TESTS>X</WITH_UNIT_TESTS>
    </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_SWAG_MAP_TYPE</CLSNAME>
+     <CMPNAME>TYPEKIND_INT8</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>nterner Typ 8 (8 Byte Integer)</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
   </asx:values>
  </asx:abap>
 </abapGit>
