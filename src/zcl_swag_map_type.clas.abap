@@ -2,7 +2,7 @@ class ZCL_SWAG_MAP_TYPE definition
   public
   create public .
 
-public section.
+  public section.
 
   constants TYPEKIND_INT8 type ABAP_TYPEKIND value '8' ##NO_TEXT.
 
