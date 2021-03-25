@@ -428,11 +428,9 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
           APPEND lv_string TO lt_string.
           CONCATENATE '"url":"' <ls_tagdescription>-externaldoc-url '" }' INTO lv_string.
           APPEND lv_string TO lt_string.
-          APPEND '}' TO lt_string.
-        ELSE.
-          APPEND '}' TO lt_string.
         ENDIF.
 
+        APPEND '}' TO lt_string.
         APPEND ',' TO lt_string.
       ENDLOOP.
       IF sy-subrc = 0.
