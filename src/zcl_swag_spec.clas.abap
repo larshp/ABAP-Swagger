@@ -6,21 +6,34 @@ CLASS zcl_swag_spec DEFINITION
 
     METHODS constructor
       IMPORTING
-        !iv_title       TYPE clike
-        !iv_description TYPE clike
-        !it_meta        TYPE zcl_swag=>ty_meta_internal_tt
-        !iv_base        TYPE clike .
+        !iv_title          TYPE clike
+        !iv_description    TYPE clike
+        !it_meta           TYPE zcl_swag=>ty_meta_internal_tt
+        !iv_base           TYPE clike
+        !it_tagdescription TYPE zcl_swag=>ty_tagdescription_tt .
     METHODS generate
       RETURNING
         VALUE(rv_spec) TYPE string .
   PROTECTED SECTION.
+
+    TYPES:
+      BEGIN OF ty_path,
+        path TYPE string,
+        meta TYPE zcl_swag=>ty_meta_internal_tt,
+      END OF ty_path .
+    TYPES:
+      ty_path_tt TYPE STANDARD TABLE OF ty_path WITH DEFAULT KEY .
 
     DATA mv_title TYPE string .
     DATA mv_description TYPE string .
     DATA mt_meta TYPE zcl_swag=>ty_meta_internal_tt .
     DATA mv_base TYPE string .
     DATA mt_definitions TYPE string_table .
+    DATA mt_tagdescription TYPE zcl_swag=>ty_tagdescription_tt .
 
+    METHODS handle_paths
+      RETURNING
+        VALUE(rt_paths) TYPE ty_path_tt .
     METHODS request
       IMPORTING
         !is_meta      TYPE zcl_swag=>ty_meta_internal
@@ -43,6 +56,9 @@ CLASS zcl_swag_spec DEFINITION
         !is_meta           TYPE zcl_swag=>ty_meta_internal
       RETURNING
         VALUE(rv_response) TYPE string .
+    METHODS tagdescriptions
+      RETURNING
+        VALUE(rv_defs) TYPE string .
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -57,6 +73,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
     mv_description = iv_description.
     mt_meta        = it_meta.
     mv_base        = iv_base.
+    mt_tagdescription = it_tagdescription.
 
   ENDMETHOD.
 
@@ -67,6 +84,8 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
           lv_sep    TYPE string,
           lt_string TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
 
+    SORT mt_definitions.
+    DELETE ADJACENT DUPLICATES FROM mt_definitions.
 
     APPEND '  "definitions":{' TO lt_string.
 
@@ -86,35 +105,17 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
 
     DEFINE _add.
       CONCATENATE rv_spec &1 cl_abap_char_utilities=>newline
-        INTO rv_spec ##NO_TEXT.
+         INTO rv_spec ##NO_TEXT.
     END-OF-DEFINITION.
-
-    TYPES: BEGIN OF ty_path,
-             path TYPE string,
-             meta LIKE mt_meta,
-           END OF ty_path.
 
     DATA: lt_paths     TYPE TABLE OF ty_path,
           lv_last_path TYPE abap_bool,
           lv_last_meta TYPE abap_bool,
-          lv_path      TYPE string,
           lv_tags      TYPE string,
           lv_add       TYPE string.
 
     FIELD-SYMBOLS: <ls_path> LIKE LINE OF lt_paths,
                    <ls_meta> LIKE LINE OF mt_meta.
-
-
-* handle path with multiple handlers(ie. GET and POST)
-    LOOP AT mt_meta ASSIGNING <ls_meta>.
-      lv_path = path( <ls_meta> ).
-      READ TABLE lt_paths ASSIGNING <ls_path> WITH KEY path = lv_path.
-      IF sy-subrc <> 0.
-        APPEND INITIAL LINE TO lt_paths ASSIGNING <ls_path>.
-        <ls_path>-path = lv_path.
-      ENDIF.
-      APPEND <ls_meta> TO <ls_path>-meta.
-    ENDLOOP.
 
     _add '{'.
     _add '  "swagger":"2.0",'.
@@ -148,6 +149,8 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
     _add '    "application/json"'.
     _add '  ],'.
     _add '  "paths":{'.
+
+    lt_paths = handle_paths( ).
 
     LOOP AT lt_paths ASSIGNING <ls_path>.
       lv_last_path = boolc( sy-tabix = lines( lt_paths ) ).
@@ -214,13 +217,33 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
         _add ','.
       ENDIF.
     ENDLOOP.
-
     _add '  },'.
-
+    lv_add = tagdescriptions( ).
+    _add lv_add.
     lv_add = definitions( ).
     _add lv_add.
-
     _add '}'.
+
+  ENDMETHOD.
+
+
+  METHOD handle_paths.
+
+    DATA lv_path      TYPE string.
+
+    FIELD-SYMBOLS: <ls_path> LIKE LINE OF rt_paths,
+                   <ls_meta> LIKE LINE OF mt_meta.
+
+* handle path with multiple handlers(ie. GET and POST)
+    LOOP AT mt_meta ASSIGNING <ls_meta>.
+      lv_path = path( <ls_meta> ).
+      READ TABLE rt_paths ASSIGNING <ls_path> WITH KEY path = lv_path.
+      IF sy-subrc <> 0.
+        APPEND INITIAL LINE TO rt_paths ASSIGNING <ls_path>.
+        <ls_path>-path = lv_path.
+      ENDIF.
+      APPEND <ls_meta> TO <ls_path>-meta.
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -327,7 +350,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
     lv_type = lo_map->map( ).
 
 * todo, basic/simple types?
-    lv_string = |"{ is_meta-meta-handler }_Request": \{{ lv_type }\}|.
+    lv_string = |"{ is_parameter-type }": \{{ lv_type }\}|.
     APPEND lv_string TO mt_definitions.
 
   ENDMETHOD.
@@ -362,11 +385,11 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
       lv_type = lo_map->map( ).
 
       APPEND '"schema": {' TO lt_string.
-      lv_string = |"$ref": "#/definitions/{ is_meta-meta-handler }_Response"|.
+      lv_string = |"$ref": "#/definitions/{ <ls_parameter>-type }"|.
       APPEND lv_string TO lt_string.
       APPEND '}' TO lt_string.
 
-      lv_string = |"{ is_meta-meta-handler }_Response":\{"type": "object","properties": \{"DATA": \{{ lv_type }\}\}\}|.
+      lv_string = |"{ <ls_parameter>-type }":\{"type": "object","properties": \{"DATA": \{{ lv_type }\}\}\}|.
       APPEND lv_string TO mt_definitions.
     ENDLOOP.
 
@@ -374,6 +397,50 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
 
     CONCATENATE LINES OF lt_string INTO rv_response
       SEPARATED BY cl_abap_char_utilities=>newline.
+
+  ENDMETHOD.
+
+
+  METHOD tagdescriptions.
+
+    DATA: lv_string TYPE string,
+          lv_sep    TYPE string,
+          lt_string TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+    FIELD-SYMBOLS: <ls_tagdescription> LIKE LINE OF mt_tagdescription.
+
+
+    IF mt_tagdescription IS NOT INITIAL.
+
+      APPEND '  "tags": [' TO lt_string.
+
+      LOOP AT mt_tagdescription ASSIGNING <ls_tagdescription>.
+        APPEND '{' TO lt_string.
+        CONCATENATE '"name":"' <ls_tagdescription>-tag '",' INTO lv_string.
+        APPEND lv_string TO lt_string.
+        CONCATENATE '"description":"' <ls_tagdescription>-description '"' INTO lv_string.
+        APPEND lv_string TO lt_string.
+        APPEND ',' TO lt_string.
+        IF <ls_tagdescription>-externaldoc IS NOT INITIAL.
+          CONCATENATE '"externalDocs": { "description":"' <ls_tagdescription>-externaldoc-description '",'
+            INTO lv_string.
+          APPEND lv_string TO lt_string.
+          CONCATENATE '"url":"' <ls_tagdescription>-externaldoc-url '" }' INTO lv_string.
+          APPEND lv_string TO lt_string.
+          APPEND '}' TO lt_string.
+          APPEND ',' TO lt_string.
+        ENDIF.
+      ENDLOOP.
+      IF sy-subrc = 0.
+* fix the comma
+        DELETE lt_string INDEX lines( lt_string ).
+        APPEND '],' TO lt_string.
+      ENDIF.
+
+      CONCATENATE LINES OF lt_string INTO rv_defs
+        SEPARATED BY cl_abap_char_utilities=>newline.
+
+    ENDIF.
 
   ENDMETHOD.
 ENDCLASS.

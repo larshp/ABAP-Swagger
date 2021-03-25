@@ -4,14 +4,6 @@ CLASS zcl_swag DEFINITION
 
   PUBLIC SECTION.
 
-    CONSTANTS:
-      BEGIN OF c_parm_kind,
-        importing TYPE seopardecl VALUE '0',
-        exporting TYPE seopardecl VALUE '1',
-        changing  TYPE seopardecl VALUE '2',
-        returning TYPE seopardecl VALUE '3',
-      END OF c_parm_kind .
-
     TYPES:
       ty_parameters_tt TYPE STANDARD TABLE OF seosubcodf WITH DEFAULT KEY .
     TYPES:
@@ -22,7 +14,7 @@ CLASS zcl_swag DEFINITION
     TYPES:
       BEGIN OF ty_response,
         remove_data_object TYPE abap_bool,
-      END OF ty_response.
+      END OF ty_response .
     TYPES:
       BEGIN OF ty_meta,
         summary           TYPE string,
@@ -43,7 +35,27 @@ CLASS zcl_swag DEFINITION
       ty_meta_internal_tt TYPE STANDARD TABLE OF ty_meta_internal WITH DEFAULT KEY .
     TYPES:
       ty_meta_tt TYPE STANDARD TABLE OF ty_meta WITH DEFAULT KEY .
+    TYPES:
+      BEGIN OF ty_externaldoc,
+        description TYPE string,
+        url         TYPE string,
+      END OF ty_externaldoc .
+    TYPES:
+      BEGIN OF ty_tagdescription,
+        tag         TYPE string,
+        description TYPE string,
+        externaldoc TYPE ty_externaldoc,
+      END OF ty_tagdescription .
+    TYPES:
+      ty_tagdescription_tt TYPE STANDARD TABLE OF ty_tagdescription WITH DEFAULT KEY .
 
+    CONSTANTS:
+      BEGIN OF c_parm_kind,
+        importing TYPE seopardecl VALUE '0',
+        exporting TYPE seopardecl VALUE '1',
+        changing  TYPE seopardecl VALUE '2',
+        returning TYPE seopardecl VALUE '3',
+      END OF c_parm_kind .
     CONSTANTS:
       BEGIN OF c_method,
         get    TYPE string VALUE 'GET',
@@ -65,11 +77,15 @@ CLASS zcl_swag DEFINITION
     METHODS run
       RAISING
         cx_static_check .
+    METHODS set_tagdescription
+      IMPORTING
+        !is_description TYPE ty_tagdescription .
   PROTECTED SECTION.
 
     DATA mv_base TYPE string .
     DATA mi_server TYPE REF TO if_http_server .
     DATA mt_meta TYPE ty_meta_internal_tt .
+    DATA mt_tagdescription TYPE ty_tagdescription_tt .
     DATA mv_swagger_json TYPE string .
     DATA mv_swagger_html TYPE string .
     DATA mv_title TYPE string .
@@ -144,7 +160,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_swag IMPLEMENTATION.
+CLASS ZCL_SWAG IMPLEMENTATION.
 
 
   METHOD build_parameters.
@@ -353,10 +369,11 @@ CLASS zcl_swag IMPLEMENTATION.
 
     CREATE OBJECT lo_spec
       EXPORTING
-        iv_title       = iv_title
-        iv_description = iv_description
-        it_meta        = mt_meta
-        iv_base        = mv_base.
+        iv_title          = iv_title
+        iv_description    = iv_description
+        it_meta           = mt_meta
+        iv_base           = mv_base
+        it_tagdescription = mt_tagdescription.
 
     lv_spec = lo_spec->generate( ).
 
@@ -434,6 +451,51 @@ CLASS zcl_swag IMPLEMENTATION.
 
     mi_server->response->set_cdata( rv_ui ).
     mi_server->response->set_status( code = 200 reason = '200' ).
+
+  ENDMETHOD.
+
+
+  METHOD handle_remove_data_object.
+
+    DATA lv_length TYPE i.
+    DATA lv_minus_data TYPE i.
+
+    IF is_meta-meta-response_settings-remove_data_object = abap_true.
+
+      lv_length = strlen( cv_data_as_string ).
+      lv_minus_data = lv_length - 9.
+
+      "start has |{"DATA":| (8) end has |}| (1)
+      cv_data_as_string = cv_data_as_string+8(lv_minus_data).
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD handle_response.
+
+    DATA:
+      lo_xstring_to_string TYPE REF TO cl_abap_conv_in_ce,
+      lo_string_to_xstring TYPE REF TO cl_abap_conv_out_ce,
+      lv_data_as_string    TYPE string.
+
+    lo_xstring_to_string = cl_abap_conv_in_ce=>create( input = cv_data ).
+    lo_xstring_to_string->read( IMPORTING data = lv_data_as_string ).
+
+    handle_remove_data_object(
+          EXPORTING
+            is_meta = is_meta
+          CHANGING
+            cv_data_as_string = lv_data_as_string ).
+
+    lo_string_to_xstring = cl_abap_conv_out_ce=>create( ).
+    lo_string_to_xstring->convert(
+      EXPORTING
+          data = lv_data_as_string
+      IMPORTING
+          buffer = cv_data ).
+
 
   ENDMETHOD.
 
@@ -593,6 +655,13 @@ CLASS zcl_swag IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD set_tagdescription.
+
+    APPEND is_description TO mt_tagdescription.
+
+  ENDMETHOD.
+
+
   METHOD text_reply.
 
     FIELD-SYMBOLS: <lg_any>       TYPE any,
@@ -637,49 +706,4 @@ CLASS zcl_swag IMPLEMENTATION.
 * todo, max one importing parameter? apart from path parameters?
 
   ENDMETHOD.
-
-  METHOD handle_response.
-
-    DATA:
-      lo_xstring_to_string TYPE REF TO cl_abap_conv_in_ce,
-      lo_string_to_xstring TYPE REF TO cl_abap_conv_out_ce,
-      lv_data_as_string    TYPE string.
-
-    lo_xstring_to_string = cl_abap_conv_in_ce=>create( input = cv_data ).
-    lo_xstring_to_string->read( IMPORTING data = lv_data_as_string ).
-
-    handle_remove_data_object(
-          EXPORTING
-            is_meta = is_meta
-          CHANGING
-            cv_data_as_string = lv_data_as_string ).
-
-    lo_string_to_xstring = cl_abap_conv_out_ce=>create( ).
-    lo_string_to_xstring->convert(
-      EXPORTING
-          data = lv_data_as_string
-      IMPORTING
-          buffer = cv_data ).
-
-
-  ENDMETHOD.
-
-
-  METHOD handle_remove_data_object.
-
-    DATA lv_length TYPE i.
-    DATA lv_minus_data TYPE i.
-
-    IF is_meta-meta-response_settings-remove_data_object = abap_true.
-
-      lv_length = strlen( cv_data_as_string ).
-      lv_minus_data = lv_length - 9.
-
-      "start has |{"DATA":| (8) end has |}| (1)
-      cv_data_as_string = cv_data_as_string+8(lv_minus_data).
-
-    ENDIF.
-
-  ENDMETHOD.
-
 ENDCLASS.

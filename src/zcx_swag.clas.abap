@@ -2,10 +2,10 @@ CLASS zcx_swag DEFINITION
   PUBLIC
   INHERITING FROM cx_static_check
   FINAL
-  CREATE PUBLIC .
+  CREATE PUBLIC.
 
   PUBLIC SECTION.
-    INTERFACES if_t100_message .
+    INTERFACES if_t100_message.
 
     DATA:
       status_code TYPE i READ-ONLY,
@@ -59,7 +59,7 @@ ENDCLASS.
 CLASS zcx_swag IMPLEMENTATION.
 
 
-  METHOD constructor ##ADT_SUPPRESS_GENERATION.
+  METHOD constructor ##adt_suppress_generation.
 
     CALL METHOD super->constructor
       EXPORTING
@@ -88,33 +88,54 @@ CLASS zcx_swag IMPLEMENTATION.
 
   METHOD raise_system.
 
+    DATA:
+      ls_textid TYPE scx_t100key,
+      lv_text1  TYPE string,
+      lv_text2  TYPE string,
+      lv_text3  TYPE string,
+      lv_text4  TYPE string.
+
+    ls_textid-msgid = sy-msgid.
+    ls_textid-msgno = sy-msgno.
+    ls_textid-attr1 = 'TEXT1'.
+    ls_textid-attr2 = 'TEXT2'.
+    ls_textid-attr3 = 'TEXT3'.
+    ls_textid-attr4 = 'TEXT4'.
+
+    lv_text1 = sy-msgv1.
+    lv_text1 = sy-msgv2.
+    lv_text1 = sy-msgv3.
+    lv_text1 = sy-msgv4.
+
     RAISE EXCEPTION TYPE zcx_swag
       EXPORTING
-        textid = VALUE scx_t100key( msgid = sy-msgid
-                                    msgno = sy-msgno
-                                    attr1 = 'TEXT1'
-                                    attr2 = 'TEXT2'
-                                    attr3 = 'TEXT3'
-                                    attr4 = 'TEXT4' )
-        text1  = CONV #( sy-msgv1 )
-        text2  = CONV #( sy-msgv2 )
-        text3  = CONV #( sy-msgv3 )
-        text4  = CONV #( sy-msgv4 ).
+        textid = ls_textid
+        text1  = lv_text1
+        text2  = lv_text2
+        text3  = lv_text3
+        text4  = lv_text4.
 
   ENDMETHOD.
 
 
   METHOD raise_text.
 
-    DATA(ls_t100_message) = text_to_t100key( text ).
+    DATA:
+      ls_t100_message TYPE ty_t100_message,
+      lv_text1        TYPE string,
+      lv_text2        TYPE string,
+      lv_text3        TYPE string,
+      lv_text4        TYPE string.
+
+    ls_t100_message = text_to_t100key( text ).
 
     RAISE EXCEPTION TYPE zcx_swag
       EXPORTING
         textid = ls_t100_message-key
-        text1  = CONV #( ls_t100_message-msgv1 )
-        text2  = CONV #( ls_t100_message-msgv2 )
-        text3  = CONV #( ls_t100_message-msgv3 )
-        text4  = CONV #( ls_t100_message-msgv4 ).
+        text1  = lv_text1
+        text2  = lv_text2
+        text3  = lv_text3
+        text4  = lv_text4.
 
   ENDMETHOD.
 
@@ -131,12 +152,12 @@ CLASS zcx_swag IMPLEMENTATION.
 
     ls_message_variables = text.
 
-    rs_result-key = VALUE scx_t100key( msgid = '00'
-                                       msgno = '001'
-                                       attr1 = 'TEXT1'
-                                       attr2 = 'TEXT2'
-                                       attr3 = 'TEXT3'
-                                       attr4 = 'TEXT4' ).
+    rs_result-key-msgid = '00'.
+    rs_result-key-msgno = '001'.
+    rs_result-key-attr1 = 'TEXT1'.
+    rs_result-key-attr2 = 'TEXT2'.
+    rs_result-key-attr3 = 'TEXT3'.
+    rs_result-key-attr4 = 'TEXT4'.
 
     rs_result-msgv1 = ls_message_variables-msgv1.
     rs_result-msgv2 = ls_message_variables-msgv2.
@@ -144,4 +165,6 @@ CLASS zcx_swag IMPLEMENTATION.
     rs_result-msgv4 = ls_message_variables-msgv4.
 
   ENDMETHOD.
+
+
 ENDCLASS.
