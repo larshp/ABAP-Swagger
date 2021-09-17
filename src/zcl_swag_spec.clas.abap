@@ -140,6 +140,7 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
     _add '  ],'.
 
     _add '  "schemes":['.
+    _add '    "https",'.
     _add '    "http"'.
     _add '  ],'.
     _add '  "consumes":['.
