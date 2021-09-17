@@ -420,16 +420,18 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
         APPEND lv_string TO lt_string.
         CONCATENATE '"description":"' <ls_tagdescription>-description '"' INTO lv_string.
         APPEND lv_string TO lt_string.
-        APPEND ',' TO lt_string.
+
         IF <ls_tagdescription>-externaldoc IS NOT INITIAL.
+          APPEND ',' TO lt_string.
           CONCATENATE '"externalDocs": { "description":"' <ls_tagdescription>-externaldoc-description '",'
             INTO lv_string.
           APPEND lv_string TO lt_string.
           CONCATENATE '"url":"' <ls_tagdescription>-externaldoc-url '" }' INTO lv_string.
           APPEND lv_string TO lt_string.
-          APPEND '}' TO lt_string.
-          APPEND ',' TO lt_string.
         ENDIF.
+
+        APPEND '}' TO lt_string.
+        APPEND ',' TO lt_string.
       ENDLOOP.
       IF sy-subrc = 0.
 * fix the comma
