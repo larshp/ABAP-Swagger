@@ -303,7 +303,7 @@ CLASS zcl_swag_spec IMPLEMENTATION.
         APPEND lv_string TO lt_string.
       ENDIF.
 
-      IF <ls_parameter>-paroptionl = abap_true.
+      IF <ls_parameter>-paroptionl = abap_true OR NOT <ls_parameter>-parvalue IS INITIAL.
         APPEND '"required":false' TO lt_string.
       ELSE.
         APPEND '"required":true' TO lt_string.
