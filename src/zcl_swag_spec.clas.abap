@@ -458,9 +458,8 @@ CLASS zcl_swag_spec IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD strip_quotes.
-    IF matches( val = iv_string regex = `['|``](.*)['|``]` ).
-      rv_result = substring( val = iv_string off = 1 len = strlen( iv_string ) - 2 ).
-    ELSE.
+    FIND REGEX `['|``](.*)['|``]` IN iv_string SUBMATCHES rv_result.
+    IF rv_result IS INITIAL.
       rv_result = iv_string.
     ENDIF.
   ENDMETHOD.
