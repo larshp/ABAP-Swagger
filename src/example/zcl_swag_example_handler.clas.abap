@@ -14,7 +14,7 @@ CLASS zcl_swag_example_handler DEFINITION
 
     METHODS the_real_stuff
       IMPORTING
-        !iv_foo        TYPE string OPTIONAL
+        !iv_foo        TYPE string DEFAULT `Moo`
         !iv_bar        TYPE string OPTIONAL
       RETURNING
         VALUE(rs_data) TYPE ty_structure.
