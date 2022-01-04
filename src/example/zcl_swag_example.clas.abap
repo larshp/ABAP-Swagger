@@ -24,7 +24,7 @@ CLASS ZCL_SWAG_EXAMPLE IMPLEMENTATION.
       EXPORTING
         ii_server = server
         iv_title  = 'Example'
-        iv_base   = '/'.
+        iv_base   = '/zswag'.  "  <=== Adapt to your SICF path
 
     CREATE OBJECT lo_handler.
     lo_swag->register( lo_handler ).

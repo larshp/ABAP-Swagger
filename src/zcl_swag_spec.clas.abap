@@ -59,12 +59,17 @@ CLASS zcl_swag_spec DEFINITION
     METHODS tagdescriptions
       RETURNING
         VALUE(rv_defs) TYPE string .
+
   PRIVATE SECTION.
+
+    METHODS strip_quotes IMPORTING iv_string        TYPE csequence
+                         RETURNING VALUE(rv_result) TYPE string.
+
 ENDCLASS.
 
 
 
-CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
+CLASS zcl_swag_spec IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -293,7 +298,12 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
       CONCATENATE lv_type ',' INTO lv_string.
       APPEND lv_string TO lt_string.
 
-      IF <ls_parameter>-paroptionl = abap_true.
+      IF NOT <ls_parameter>-parvalue IS INITIAL.
+        lv_string = |"default":"{ strip_quotes( <ls_parameter>-parvalue ) }",|.
+        APPEND lv_string TO lt_string.
+      ENDIF.
+
+      IF <ls_parameter>-paroptionl = abap_true OR NOT <ls_parameter>-parvalue IS INITIAL.
         APPEND '"required":false' TO lt_string.
       ELSE.
         APPEND '"required":true' TO lt_string.
@@ -446,4 +456,12 @@ CLASS ZCL_SWAG_SPEC IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+
+  METHOD strip_quotes.
+    FIND REGEX `['|``](.*)['|``]` IN iv_string SUBMATCHES rv_result.
+    IF rv_result IS INITIAL.
+      rv_result = iv_string.
+    ENDIF.
+  ENDMETHOD.
+
 ENDCLASS.
