@@ -1,21 +1,23 @@
-CLASS zcl_swag_map_type DEFINITION
-  PUBLIC
-  CREATE PUBLIC .
+class ZCL_SWAG_MAP_TYPE definition
+  public
+  create public .
 
-  PUBLIC SECTION.
+  public section.
 
-    CLASS-METHODS get_typedescr
-      IMPORTING
-        !is_parm            TYPE seosubcodf
-      RETURNING
-        VALUE(ro_typedescr) TYPE REF TO cl_abap_typedescr .
-    METHODS map
-      RETURNING
-        VALUE(rv_type) TYPE string .
-    METHODS constructor
-      IMPORTING
-        !is_param  TYPE seosubcodf
-        !iv_schema TYPE abap_bool DEFAULT abap_true .
+    constants TYPEKIND_INT8 type ABAP_TYPEKIND value '8' ##NO_TEXT.
+
+  class-methods GET_TYPEDESCR
+    importing
+      !IS_PARM type SEOSUBCODF
+    returning
+      value(RO_TYPEDESCR) type ref to CL_ABAP_TYPEDESCR .
+  methods MAP
+    returning
+      value(RV_TYPE) type STRING .
+  methods CONSTRUCTOR
+    importing
+      !IS_PARAM type SEOSUBCODF
+      !IV_SCHEMA type ABAP_BOOL default ABAP_TRUE .
   PROTECTED SECTION.
 
     DATA mv_schema TYPE abap_bool .
@@ -106,7 +108,9 @@ CLASS ZCL_SWAG_MAP_TYPE IMPLEMENTATION.
       WHEN cl_abap_elemdescr=>typekind_char.
         rv_type = |"type":"string", "maxLength": { lo_elemdescr->output_length }|.
       WHEN cl_abap_elemdescr=>typekind_int1
-          OR cl_abap_elemdescr=>typekind_int.
+          OR cl_abap_elemdescr=>typekind_int
+          OR cl_abap_elemdescr=>typekind_int2
+          OR typekind_int8. " does not exist before ABAP 7.50
         rv_type = '"type":"integer"'.
       WHEN cl_abap_elemdescr=>typekind_packed.
         rv_type = '"type":"number"'.
