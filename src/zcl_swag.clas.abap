@@ -597,7 +597,6 @@ CLASS ZCL_SWAG IMPLEMENTATION.
       generate_ui(
         iv_json_url = mv_base && mv_swagger_json
         iv_title    = mv_title && ' - Swagger' ).
-        
       mi_server->response->set_header_field( name  = 'content-type'
                                                        value = 'text/html' ).        
       RETURN.
